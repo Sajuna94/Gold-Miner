@@ -2,6 +2,10 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
+#include "Util/Image.hpp"
+#include "Util/Renderer.hpp"
+#include "GG.hpp"
+
 
 class App {
 public:
@@ -23,7 +27,13 @@ private:
     void ValidTask();
 
 private:
+    Util::Renderer m_Root;
+
+
     State m_CurrentState = State::START;
+
+
+    std::shared_ptr<GG> m_Background;
 };
 
 #endif
