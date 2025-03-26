@@ -3,8 +3,10 @@
 
 #include "pch.hpp" // IWYU pragma: export
 #include "Util/Image.hpp"
+#include "Util/GameObject.hpp"
 #include "Util/Renderer.hpp"
-#include "GG.hpp"
+#include "Button.h"
+#include "Text.h"
 
 
 class App {
@@ -14,6 +16,14 @@ public:
         UPDATE,
         END,
     };
+
+    enum class Screen {
+        START_MENU,
+        STORE_MENU,
+        GAME_MENU,
+    };
+
+
 
     State GetCurrentState() const { return m_CurrentState; }
 
@@ -31,9 +41,11 @@ private:
 
 
     State m_CurrentState = State::START;
+    Screen m_CurrentScreen = Screen::START_MENU;
 
+     std::shared_ptr<Text> m_Text;
 
-    std::shared_ptr<GG> m_Background;
+    std::shared_ptr<Button> m_startButton;
 };
 
 #endif

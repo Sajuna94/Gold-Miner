@@ -1,19 +1,25 @@
 #include "App.hpp"
 
-#include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 #include <iostream>
 
+#include "Util/Text.hpp"
+#include "Text.h"
+
 void App::Start() {
     LOG_TRACE("Start");
 
-    m_Background = std::make_shared<GG>(RESOURCE_DIR"/gold_miner_source/bag-sheet0.png");
-    m_Background->SetPosition({0.5f, 0.5f});
+    m_startButton = std::make_shared<Button>(RESOURCE_DIR"/gold_miner_source/button-sheet0.png");
+    m_startButton->SetPosition({0.5f, 0.5f});
 
-    m_Root.AddChild(m_Background);
+    m_Root.AddChild(m_startButton);
+
+    m_Text = std::make_shared<Text>("Start", 50);
+    m_Root.AddChild(m_Text);
+
 
 
 
@@ -23,7 +29,15 @@ void App::Start() {
 void App::Update() {
     
     //TODO: do your things here and delete this line <3
-    std::cout << m_Background->GetPosition().x << std::endl;
+    if (m_startButton->CheckClick()) {
+        std::cout << "startButton Pressed" << std::endl;
+
+        m_CurrentScreen = Screen::GAME_MENU;
+        // ChangeScreen(Screen::GAME_MENU);
+    }
+
+
+
     /*
      * Do not touch the code below as they serve the purpose for
      * closing the window.

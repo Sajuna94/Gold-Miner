@@ -22,22 +22,23 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(ptsd)
 
-include(files.cmake)
-set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-list(TRANSFORM SRC_FILES PREPEND ${SRC_DIR}/)
-list(TRANSFORM INCLUDE_FILES PREPEND ${INCLUDE_DIR}/)
+file(GLOB_RECURSE SRC_FILES src/*)
+file(GLOB_RECURSE HEADER_FILES include/*)
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 
-# file(GLOB_RECURSE SRC_FILES src/*)
-# file(GLOB_RECURSE HEADER_FILES include/*)
+#include(files.cmake)
+#set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+#set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+#list(TRANSFORM SRC_FILES PREPEND ${SRC_DIR}/)
+#list(TRANSFORM INCLUDE_FILES PREPEND ${INCLUDE_DIR}/)
 
-add_executable(${PROJECT_NAME}
-    ${SRC_DIR}/main.cpp
-    ${SRC_FILES}
-    ${HEADER_FILES}
-        include/GG.hpp
-        src/GG.cpp
-)
+#add_executable(${PROJECT_NAME}
+#    ${SRC_DIR}/main.cpp
+#    ${SRC_FILES}
+#    ${HEADER_FILES}
+#        include/GG.hpp
+#        src/GG.cpp
+#)
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4)
