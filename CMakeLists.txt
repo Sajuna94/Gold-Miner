@@ -36,8 +36,6 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 #    ${SRC_DIR}/main.cpp
 #    ${SRC_FILES}
 #    ${HEADER_FILES}
-#        include/GG.hpp
-#        src/GG.cpp
 #)
 
 if(MSVC)
