@@ -11,8 +11,6 @@ public:
         m_Transform.translation = {0.0F, 120.0F};
         m_Transform.scale = {0.7F, 0.7F};
     }
-
-private:
 };
 
 

@@ -3,7 +3,7 @@
 
 void StartMenu::Open()
 {
-    m_StartButton = std::make_shared<Button>(RESOURCE_DIR"/res/iphonehd/gold-miner-text.png");
+    m_StartButton = std::make_shared<UI::Button>(RESOURCE_DIR"/res/iphonehd/gold-miner-text.png");
     m_StartButton->SetPosition({0.5f, 0.5f});
 
     m_Root->AddChild(m_StartButton);

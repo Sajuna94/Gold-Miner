@@ -3,6 +3,7 @@
 
 #include "Menu.h"
 #include "Miner.h"
+#include "Ores/Diamond.h"
 
 class GameMenu final : public Menu {
 public:
@@ -17,6 +18,7 @@ public:
 
 private:
     std::shared_ptr<Miner> m_Miner;
+    std::vector<std::shared_ptr<Ore>> m_OreList;
 };
 
 

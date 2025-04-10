@@ -16,7 +16,7 @@ public:
     void Close() override;
 
 private:
-    std::shared_ptr<Button> m_StartButton;
+    std::shared_ptr<UI::Button> m_StartButton;
 };
 
 
