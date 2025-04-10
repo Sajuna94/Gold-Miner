@@ -4,7 +4,7 @@
 void GameMenu::Open()
 {
     m_Miner = std::make_shared<Miner>();
-    m_Root.AddChild(m_Miner);
+    m_Root->AddChild(m_Miner);
 }
 
 void GameMenu::Update(App* app)

@@ -7,13 +7,13 @@ void Button::Click()
 {
 }
 
-bool Button::CheckClick()
+bool Button::IsClicked()
 {
-    if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover())
+    if (!waitingMouseUp && Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover())
     {
         this->waitingMouseUp = true;
     }
-    if (waitingMouseUp && Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB))
+    if (waitingMouseUp && Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB) && OnHover())
     {
         this->waitingMouseUp = false;
         return OnHover();

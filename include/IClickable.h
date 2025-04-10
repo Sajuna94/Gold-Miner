@@ -9,7 +9,7 @@ public:
     virtual void Click() = 0;
 
     // check mouse was click the button
-    [[nodiscard]] virtual bool CheckClick() = 0;
+    [[nodiscard]] virtual bool IsClicked() = 0;
 
     // check mouse hover on the UI
     [[nodiscard]] virtual bool OnHover() const = 0;

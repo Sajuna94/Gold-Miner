@@ -5,11 +5,8 @@
 #include "UI/Button.h"
 
 class StartMenu final : public Menu {
-private:
-    std::shared_ptr<Button> m_StartButton;
-
 public:
-    explicit StartMenu(const Util::Renderer &root) : Menu(root) {
+    explicit StartMenu(Util::Renderer *root) : Menu(root) {
     }
 
     void Open() override;
@@ -17,6 +14,9 @@ public:
     void Update(App *app) override;
 
     void Close() override;
+
+private:
+    std::shared_ptr<Button> m_StartButton;
 };
 
 

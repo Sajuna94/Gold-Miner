@@ -5,23 +5,22 @@
 #include "Util/Renderer.hpp"
 
 class Menu : public Util::GameObject {
-private:
+public:
     enum class Screen {
         START_MENU,
         STORE_MENU,
         GAME_MENU,
     };
 
-public:
-    Util::Renderer m_Root;
+    Util::Renderer *m_Root;
 
-    explicit Menu(const Util::Renderer &root) { m_Root = root; }
+    explicit Menu(Util::Renderer *root) { m_Root = root; }
 
     virtual void Open() = 0;
 
     virtual void Update(App *app) = 0;
 
-    virtual void Close() const = 0;
+    virtual void Close() = 0;
 };
 
 
