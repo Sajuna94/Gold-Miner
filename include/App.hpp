@@ -2,32 +2,26 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
-#include "Util/Image.hpp"
-#include "Util/GameObject.hpp"
 #include "Util/Renderer.hpp"
-#include "Button.h"
-#include "Text.h"
-#include "Menu.h"
+#include "UI/Text.h"
+#include "BackgroundImage.h"
+#include "Menus/GameMenu.h"
+#include "Menus/StartMenu.h"
 
-
-
-class App {
+class App
+{
 public:
-    enum class State {
+    enum class State
+    {
         START,
         UPDATE,
         END,
     };
 
-    enum class Screen {
-        START_MENU,
-        STORE_MENU,
-        GAME_MENU,
-    };
-
-
-
-    State GetCurrentState() const { return m_CurrentState; }
+    [[nodiscard]] State GetCurrentState() const { return m_CurrentState; }
+    std::shared_ptr<BackgroundImage> GetBackgroundImage() const { return m_BackgroundImage; }
+    std::shared_ptr<GameMenu> GetGameMenu() const { return m_GameMenu; }
+    Util::Renderer* GetRendererRoot() { return &m_Root; };
 
     void Start();
 
@@ -40,14 +34,13 @@ private:
 
 private:
     Util::Renderer m_Root;
-
-
     State m_CurrentState = State::START;
-    Screen m_CurrentScreen = Screen::START_MENU;
 
-    std::shared_ptr<Text> m_Text;
 
-    std::shared_ptr<Menu> m_startMenu;
+    // std::shared_ptr<Text> m_Text;
+    std::shared_ptr<BackgroundImage> m_BackgroundImage;
+    std::shared_ptr<StartMenu> m_StartMenu;
+    std::shared_ptr<GameMenu> m_GameMenu;
 };
 
 #endif
