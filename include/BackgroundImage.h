@@ -18,8 +18,9 @@ public:
         temp->SetImage(imagePath);
 
         glm::vec2 const size = temp->GetSize();
-        m_Transform.scale = {WINDOW_WIDTH / size.x, WINDOW_HEIGHT / size.y};
-    };
+        float scaleMin = std::min(WINDOW_WIDTH / size.x, WINDOW_HEIGHT / size.y);
+        m_Transform.scale = {scaleMin, scaleMin};
+    }
 };
 
 
