@@ -7,6 +7,8 @@
 #include "Util/Renderer.hpp"
 #include "Button.h"
 #include "Text.h"
+#include "Menu.h"
+
 
 
 class App {
@@ -43,9 +45,9 @@ private:
     State m_CurrentState = State::START;
     Screen m_CurrentScreen = Screen::START_MENU;
 
-     std::shared_ptr<Text> m_Text;
+    std::shared_ptr<Text> m_Text;
 
-    std::shared_ptr<Button> m_startButton;
+    std::shared_ptr<Menu> m_startMenu;
 };
 
 #endif

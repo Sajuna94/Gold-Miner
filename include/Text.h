@@ -8,7 +8,11 @@
 class Text : public Util::GameObject {
 public:
     Text(const std::string &text, const int size) : GameObject(
-            std::make_unique<Util::Text>(RESOURCE_DIR"/Font/Inkfree.ttf", size, text, Util::Color::FromName(Util::Colors::WHITE)),
+            std::make_unique<Util::Text>(
+                RESOURCE_DIR"/Font/Inkfree.ttf",
+                size,
+                text,
+                Util::Color::FromName(Util::Colors::WHITE)),
             100
     ) {
         m_Transform.translation = { 0.0F, 0.0F };

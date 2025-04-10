@@ -7,6 +7,7 @@ void Button::Click() {
 
 }
 
+
 bool Button::CheckClick() {
     if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover()) {
         this->waitingMouseUp = true;

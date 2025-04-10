@@ -5,17 +5,13 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 #include <iostream>
+#include "Menu.h"
 
 #include "Util/Text.hpp"
 #include "Text.h"
 
 void App::Start() {
     LOG_TRACE("Start");
-
-    m_startButton = std::make_shared<Button>(RESOURCE_DIR"/gold_miner_source/button-sheet0.png");
-    m_startButton->SetPosition({0.5f, 0.5f});
-
-    m_Root.AddChild(m_startButton);
 
     m_Text = std::make_shared<Text>("Start", 50);
     m_Root.AddChild(m_Text);
@@ -29,12 +25,17 @@ void App::Start() {
 void App::Update() {
     
     //TODO: do your things here and delete this line <3
-    if (m_startButton->CheckClick()) {
-        std::cout << "startButton Pressed" << std::endl;
 
-        m_CurrentScreen = Screen::GAME_MENU;
-        // ChangeScreen(Screen::GAME_MENU);
+    switch (m_CurrentScreen) {
+        case Screen::START_MENU: m_startMenu->Update(); break;
+        case Screen::GAME_MENU: m_startMenu->Update(); break;
+        case Screen::STORE_MENU: m_startMenu->Update(); break;
     }
+
+
+
+
+
 
 
 
