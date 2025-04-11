@@ -3,17 +3,17 @@
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 
-void Button::Click()
+void UI::Button::Click()
 {
 }
 
-bool Button::CheckClick()
+bool UI::Button::IsClicked()
 {
-    if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover())
+    if (!waitingMouseUp && Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover())
     {
         this->waitingMouseUp = true;
     }
-    if (waitingMouseUp && Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB))
+    if (waitingMouseUp && Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB) && OnHover())
     {
         this->waitingMouseUp = false;
         return OnHover();
@@ -21,7 +21,7 @@ bool Button::CheckClick()
     return false;
 }
 
-bool Button::OnHover() const
+bool UI::Button::OnHover() const
 {
     glm::vec2 const cursorPos = Util::Input::GetCursorPosition();
     glm::vec2 const buttonPos = this->GetPosition();

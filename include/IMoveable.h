@@ -5,7 +5,8 @@
 #ifndef IMOVEABLE_H
 #define IMOVEABLE_H
 
-class IMoveable {
+class IMoveable
+{
 public:
     virtual ~IMoveable() = default;
 

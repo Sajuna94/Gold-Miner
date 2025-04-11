@@ -6,12 +6,11 @@
 
 class Miner final : public Util::GameObject
 {
-private:
 public:
     Miner() : GameObject(
         std::make_unique<Util::Image>(RESOURCE_DIR"/res/iphonehd/miner.png"), 10)
     {
-        m_Transform.translation = {0.0F, 120.0F};
+        m_Transform.translation = {0.0F, 200.0F};
         m_Transform.scale = {0.7F, 0.7F};
     }
 };

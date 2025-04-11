@@ -6,7 +6,7 @@
 
 class Menu : public Util::GameObject
 {
-private:
+public:
     enum class Screen
     {
         START_MENU,
@@ -14,12 +14,15 @@ private:
         GAME_MENU,
     };
 
-public:
-    virtual void Open(Util::Renderer* m_Root) = 0;
+    Util::Renderer* m_Root;
+
+    explicit Menu(Util::Renderer* root) { m_Root = root; }
+
+    virtual void Open() = 0;
 
     virtual void Update(App* app) = 0;
 
-    virtual void Close(Util::Renderer* m_Root) const = 0;
+    virtual void Close() = 0;
 };
 
 

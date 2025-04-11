@@ -5,24 +5,28 @@
 #include "Util/Image.hpp"
 #include "IClickable.h"
 
-class Button final : public Util::GameObject, public IClickable
+namespace UI
 {
-private:
-    bool waitingMouseUp = false;
-
-public:
-    explicit Button(const std::string& imagePath)
-        : GameObject(std::make_unique<Util::Image>(imagePath), 10)
+    class Button final : public Util::GameObject, public IClickable
     {
-    }
+    public:
+        explicit Button(const std::string& imagePath)
+            : GameObject(std::make_unique<Util::Image>(imagePath), 10)
+        {
+        }
 
-    void SetPosition(const glm::vec2& Position) { m_Transform.translation = Position; }
-    [[nodiscard]] const glm::vec2& GetPosition() const { return m_Transform.translation; }
+        void SetPosition(const glm::vec2& Position) { m_Transform.translation = Position; }
+        [[nodiscard]] const glm::vec2& GetPosition() const { return m_Transform.translation; }
 
-    void Click() override;
-    [[nodiscard]] bool CheckClick() override;
-    [[nodiscard]] bool OnHover() const override;
-};
+        void Click() override;
 
+        [[nodiscard]] bool IsClicked() override;
+
+        [[nodiscard]] bool OnHover() const override;
+
+    private:
+        bool waitingMouseUp = false;
+    };
+}
 
 #endif //BUTTON_H
