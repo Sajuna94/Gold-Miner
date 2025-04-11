@@ -1,5 +1,12 @@
 #include "Menus/GameMenu.h"
 #include "App.hpp"
+#include "Util/Input.hpp"
+
+void GameMenu::Stop()
+{
+
+}
+
 
 void GameMenu::Open(Util::Renderer* m_Root)
 {
@@ -9,6 +16,11 @@ void GameMenu::Open(Util::Renderer* m_Root)
 
 void GameMenu::Update(App* app)
 {
+    // throw pickaxe
+    if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB))
+    {
+
+    }
 }
 
 void GameMenu::Close(Util::Renderer* m_Root) const
