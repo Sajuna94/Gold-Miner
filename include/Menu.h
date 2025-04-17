@@ -4,9 +4,11 @@
 #include "Util/GameObject.hpp"
 #include "Util/Renderer.hpp"
 
-class Menu : public Util::GameObject
+class Menu
 {
 public:
+    virtual ~Menu() = default;
+
     enum class Screen
     {
         START_MENU,
@@ -19,9 +21,7 @@ public:
     explicit Menu(Util::Renderer* root) { m_Root = root; }
 
     virtual void Open() = 0;
-
     virtual void Update(App* app) = 0;
-
     virtual void Close() = 0;
 };
 

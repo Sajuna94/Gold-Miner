@@ -34,9 +34,6 @@ void App::Start() {
 
 void App::Update() {
     //TODO: do your things here and delete this line <3
-
-    m_Menu->Update(this);
-
     /*
      * Do not touch the code below as they serve the purpose for
      * closing the window.
@@ -46,9 +43,10 @@ void App::Update() {
         m_CurrentState = State::END;
     }
     m_Root.Update();
+    m_Menu->Update(this);
 }
 
-void App::ChangeMenu(Menu::Screen screen) {
+void App::ChangeMenu(const Menu::Screen screen) {
     m_Menu->Close();
     switch (screen) {
         case Menu::Screen::START_MENU:
@@ -57,7 +55,7 @@ void App::ChangeMenu(Menu::Screen screen) {
             break;
         case Menu::Screen::GAME_MENU:
             m_Menu = std::make_shared<GameMenu>(&m_Root);
-            m_BackgroundImage->SetImage(RESOURCE_DIR"/image/background.bmp");
+            m_BackgroundImage->SetImage(RESOURCE_DIR"/Background/game_background.png");
             break;
         case Menu::Screen::STORE_MENU:
             break;

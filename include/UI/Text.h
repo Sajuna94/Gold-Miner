@@ -11,7 +11,7 @@ namespace UI
     {
     public:
         Text(const std::string& text, const int size) : GameObject(
-            std::make_unique<Util::Text>(RESOURCE_DIR"/Font/samsung-sans-4/SamsungSans-Regular.ttf", size, text,
+            std::make_unique<Util::Text>(RESOURCE_DIR"/Font/Caveat-Bold.ttf", size, text,
                                          Util::Color::FromName(Util::Colors::WHITE)),
             100
         )
@@ -25,6 +25,12 @@ namespace UI
         {
             const auto temp = std::dynamic_pointer_cast<Util::Text>(m_Drawable);
             temp->SetText(text);
+        }
+
+        void SetColor(const Util::Color color) const
+        {
+            const auto temp = std::dynamic_pointer_cast<Util::Text>(m_Drawable);
+            temp->SetColor(color);
         }
     };
 }

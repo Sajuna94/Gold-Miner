@@ -4,15 +4,15 @@
 #include "Menu.h"
 #include "UI/Button.h"
 
-class StartMenu final : public Menu {
+class StartMenu final : public Menu
+{
 public:
-    explicit StartMenu(Util::Renderer *root) : Menu(root) {
+    explicit StartMenu(Util::Renderer* root) : Menu(root)
+    {
     }
 
     void Open() override;
-
-    void Update(App *app) override;
-
+    void Update(App* app) override;
     void Close() override;
 
 private:

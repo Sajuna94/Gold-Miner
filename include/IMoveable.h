@@ -10,7 +10,9 @@ class IMoveable
 public:
     virtual ~IMoveable() = default;
 
-
+    glm::vec2 GetPosition() const
+    {
+    }
 };
 
 #endif //IMOVEABLE_H

@@ -11,8 +11,22 @@ namespace UI
 {
     class Picture final : public Util::GameObject
     {
-        explicit Picture(const std::string& imagePath, glm::vec2 position) : GameObject(
-            std::make_unique<Util::Image>(RESOURCE_DIR + imagePath), 0)
+    public:
+        explicit Picture(const std::string& imagePath, const glm::vec2 position) : GameObject(
+            std::make_unique<Util::Image>(imagePath), 5)
+        {
+            m_Transform.translation = position;
+        }
+
+        void SetScaleSize(const glm::vec2 scale)
+        {
+            m_Transform.scale = scale;
+        }
+        void SetRotation(const float rotation)
+        {
+            m_Transform.rotation = rotation;
+        }
+        void SetPosition(const glm::vec2 position)
         {
             m_Transform.translation = position;
         }

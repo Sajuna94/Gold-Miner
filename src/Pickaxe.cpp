@@ -1,60 +1,70 @@
 #include "Pickaxe.h"
 #include <cmath>
-#include <iostream>
 
 #include "config.hpp"
-#include "Util/Time.hpp"
 #define PI 3.141592653589793;
 
-
-void Pickaxe::Throw()
+void Pickaxe::SetDragOre(const std::shared_ptr<Ore>& ore)
 {
-    if (currentThrowState != ThrowState::STOP)
-        return;
-    printf("[~] Pickaxe start thrown\n");
-    currentThrowState = ThrowState::THROWN;
+    m_DragOre = ore;
+    m_DragOre->SetZIndex(m_ZIndex - 1);
+    m_MoveSpeed /= (ore->GetWeight() * 0.1f);
+    const glm::vec2 dPos = {
+        sin(m_Transform.rotation) * (10 + ore->GetHitBox().size.y * 0.5f),
+        -cos(m_Transform.rotation) * (10 + ore->GetHitBox().size.y * 0.5f),
+    };
+    m_DragOre->SetRotation(m_Transform.rotation);
+    m_DragOre->SetPosition(m_Transform.translation + dPos);
 }
 
-void Pickaxe::Update()
+std::shared_ptr<Ore> Pickaxe::TakeDragOre()
 {
-    const float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;
+    m_MoveSpeed = 300.0f;
+    auto temp = m_DragOre;
+    m_DragOre = nullptr;
+    return temp;
+}
 
-    if (currentThrowState == ThrowState::STOP)
+
+void Pickaxe::Update(const float dt)
+{
+    if (m_CurrentState == State::STOP)
         UpdateAngle(dt);
     else
     {
         const glm::vec2 curPos = m_Transform.translation;
-
-        if (IsOutOfBounds(curPos))
-        {
-            currentThrowState = ThrowState::RETURN;
-            printf("[^] Pickaxe out of range (%.2f, %.2f)\n", curPos.x, curPos.y);
-        }
-        if (curPos.y > defaultPosition.y)
-        {
-            currentThrowState = ThrowState::STOP;
-            m_Transform.translation = defaultPosition;
-        }
-
         const glm::vec2 dPos = {
-            sin(m_Transform.rotation) * moveSpeed * dt,
-            cos(m_Transform.rotation) * -moveSpeed * dt
+            sin(m_Transform.rotation) * m_MoveSpeed * dt,
+            -cos(m_Transform.rotation) * m_MoveSpeed * dt
         };
 
-        if (currentThrowState == ThrowState::THROWN)
+        if (m_CurrentState == State::THROWN)
             m_Transform.translation = curPos + dPos;
-        if (currentThrowState == ThrowState::RETURN)
+        else if (m_CurrentState == State::RETURN)
+        {
             m_Transform.translation = curPos - dPos;
+            if (m_DragOre)
+                m_DragOre->SetPosition(m_DragOre->GetPosition() - dPos);
+        }
     }
 }
 
-bool Pickaxe::IsOutOfBounds(const glm::vec2 pos) const
+void Pickaxe::UpdateMove(float dt)
 {
-    const glm::vec2 size = GetScaledSize();
-    return
-        pos.y < -((WINDOW_HEIGHT - size.y) / 2.0f) ||
-        pos.x < -((WINDOW_WIDTH - size.x) / 2.0f) ||
-        pos.x > (WINDOW_WIDTH - size.x) / 2.0f;
+    const glm::vec2 curPos = m_Transform.translation;
+    const glm::vec2 dPos = {
+        sin(m_Transform.rotation) * m_MoveSpeed * dt,
+        -cos(m_Transform.rotation) * m_MoveSpeed * dt
+    };
+
+    if (m_CurrentState == State::THROWN)
+        m_Transform.translation = curPos + dPos;
+    else if (m_CurrentState == State::RETURN)
+    {
+        m_Transform.translation = curPos - dPos;
+        if (m_DragOre)
+            m_DragOre->SetPosition(m_DragOre->GetPosition() - dPos);
+    }
 }
 
 

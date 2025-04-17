@@ -11,6 +11,9 @@ void StartMenu::Open()
 
 void StartMenu::Update(App* app)
 {
+    app->ChangeMenu(Screen::GAME_MENU);
+    return;
+
     if (m_StartButton->IsClicked())
     {
         printf("[~] Click StartButton\n");
