@@ -18,6 +18,8 @@ class GameMenu final : public Menu
     std::shared_ptr<UI::Picture> m_Rope;
     std::list<std::shared_ptr<Ore>> m_OreList;
 
+    glm::vec2 m_ThrownPosition;
+
     std::shared_ptr<UI::Text> m_TimerText;
     std::shared_ptr<UI::Text> m_MoneyText;
     std::shared_ptr<UI::Text> m_LevelText;

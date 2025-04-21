@@ -13,22 +13,17 @@
 void App::Start() {
     LOG_TRACE("Start");
 
-    // Add text
-    // m_Text = std::make_shared<Text>("Start", 50);
-    // m_Root.AddChild(m_Text);
-
     // Add background image
     m_BackgroundImage = std::make_shared<BackgroundImage>();
     m_Root.AddChild(m_BackgroundImage);
 
     // Add all menu
     m_Menu = std::make_shared<StartMenu>(&m_Root);
-    // m_Root.AddChild(m_Menu);
 
     // Set App State
     m_CurrentState = State::UPDATE;
 
-    // Open start menu ( the first menu
+    // Open start menu
     m_Menu->Open();
 }
 

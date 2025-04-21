@@ -25,31 +25,7 @@ std::shared_ptr<Ore> Pickaxe::TakeDragOre()
     return temp;
 }
 
-
-void Pickaxe::Update(const float dt)
-{
-    if (m_CurrentState == State::STOP)
-        UpdateAngle(dt);
-    else
-    {
-        const glm::vec2 curPos = m_Transform.translation;
-        const glm::vec2 dPos = {
-            sin(m_Transform.rotation) * m_MoveSpeed * dt,
-            -cos(m_Transform.rotation) * m_MoveSpeed * dt
-        };
-
-        if (m_CurrentState == State::THROWN)
-            m_Transform.translation = curPos + dPos;
-        else if (m_CurrentState == State::RETURN)
-        {
-            m_Transform.translation = curPos - dPos;
-            if (m_DragOre)
-                m_DragOre->SetPosition(m_DragOre->GetPosition() - dPos);
-        }
-    }
-}
-
-void Pickaxe::UpdateMove(float dt)
+void Pickaxe::UpdateNextMove(const float dt)
 {
     const glm::vec2 curPos = m_Transform.translation;
     const glm::vec2 dPos = {
@@ -66,7 +42,6 @@ void Pickaxe::UpdateMove(float dt)
             m_DragOre->SetPosition(m_DragOre->GetPosition() - dPos);
     }
 }
-
 
 void Pickaxe::UpdateAngle(const float dt)
 {

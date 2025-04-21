@@ -33,7 +33,6 @@ private:
     Util::Renderer m_Root;
     State m_CurrentState = State::START;
 
-    // std::shared_ptr<Text> m_Text;
     std::shared_ptr<BackgroundImage> m_BackgroundImage;
     std::shared_ptr<Menu> m_Menu;
 };

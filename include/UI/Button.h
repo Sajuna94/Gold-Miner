@@ -4,6 +4,7 @@
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
 #include "IClickable.h"
+#include "Picture.h"
 
 namespace UI
 {
@@ -23,6 +24,12 @@ namespace UI
         [[nodiscard]] bool IsClicked() override;
 
         [[nodiscard]] bool OnHover() const override;
+
+        void SetImage(const std::string& imagePath) const
+        {
+            auto const temp = std::dynamic_pointer_cast<Util::Image>(m_Drawable);
+            temp->SetImage(imagePath);
+        }
 
     private:
         bool waitingMouseUp = false;
