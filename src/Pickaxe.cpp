@@ -1,7 +1,6 @@
 #include "Pickaxe.h"
 #include <cmath>
 
-#include "config.hpp"
 #define PI 3.141592653589793;
 
 void Pickaxe::SetDragOre(const std::shared_ptr<Ore>& ore)
@@ -10,8 +9,8 @@ void Pickaxe::SetDragOre(const std::shared_ptr<Ore>& ore)
     m_DragOre->SetZIndex(m_ZIndex - 1);
     m_MoveSpeed /= (ore->GetWeight() * 0.1f);
     const glm::vec2 dPos = {
-        sin(m_Transform.rotation) * (10 + ore->GetHitBox().size.y * 0.5f),
-        -cos(m_Transform.rotation) * (10 + ore->GetHitBox().size.y * 0.5f),
+        sin(m_Transform.rotation) * (10 + ore->GetHitBoxSize().y * 0.5f),
+        -cos(m_Transform.rotation) * (10 + ore->GetHitBoxSize().y * 0.5f),
     };
     m_DragOre->SetRotation(m_Transform.rotation);
     m_DragOre->SetPosition(m_Transform.translation + dPos);

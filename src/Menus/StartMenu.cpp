@@ -6,11 +6,11 @@ void StartMenu::Open()
 {
     m_MinerPicture = std::make_shared<UI::Picture>(RESOURCE_DIR"/Picture/gold-miner-text.png");
     m_MinerPicture->SetPosition({0, 100});
-    m_Root->AddChild(m_MinerPicture);
+    AddChild(m_MinerPicture);
 
     m_StartButton = std::make_shared<UI::Button>(RESOURCE_DIR"/Button/start-1.png");
     m_StartButton->SetPosition({0, -50});
-    m_Root->AddChild(m_StartButton);
+    AddChild(m_StartButton);
 }
 
 void StartMenu::Update(App* app)
@@ -29,6 +29,7 @@ void StartMenu::Update(App* app)
 void StartMenu::Close()
 {
     printf("[~] Close StartMenu\n");
-    m_Root->RemoveChild(m_StartButton);
-    m_Root->RemoveChild(m_MinerPicture);
+    auto children = GetChildren();
+    for (const auto& child : children)
+        RemoveChild(child);
 }

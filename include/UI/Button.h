@@ -3,8 +3,7 @@
 
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
-#include "IClickable.h"
-#include "Picture.h"
+#include "Interface/IClickable.h"
 
 namespace UI
 {

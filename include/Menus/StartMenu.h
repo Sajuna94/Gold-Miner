@@ -12,7 +12,7 @@ private:
     std::shared_ptr<UI::Picture> m_MinerPicture;
 
 public:
-    explicit StartMenu(Util::Renderer* root) : Menu(root)
+    StartMenu() : Menu(RESOURCE_DIR"/image/background.png")
     {
     }
 

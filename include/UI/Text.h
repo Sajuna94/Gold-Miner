@@ -1,7 +1,7 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include "IMoveable.h"
+#include "Interface/IMoveable.h"
 #include "Util/GameObject.hpp"
 #include "Util/Text.hpp"
 #include "Util/Color.hpp"
@@ -25,8 +25,10 @@ namespace UI
         {
         }
 
-        glm::vec2 GetPosition() const override { return m_Transform.translation; }
+        // Interface IMoveable
+        [[nodiscard]] glm::vec2 GetPosition() const override { return m_Transform.translation; }
         void SetPosition(const glm::vec2& position) override { m_Transform.translation = position; }
+        void SetRotation(const float rotation) override { m_Transform.rotation = rotation; }
 
         void SetText(const std::string& text)
         {

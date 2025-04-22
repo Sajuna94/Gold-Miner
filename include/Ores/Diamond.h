@@ -21,9 +21,10 @@ public:
             true, 100, true, 100))
     {
         SetDrawable(m_Animation);
-        SetHitBox({0, 0}, {31, 21});
         m_ZIndex = 33;
     }
+
+    [[nodiscard]] glm::vec2 GetHitBoxSize() const override { return {31, 21}; }
 
 private:
     std::shared_ptr<Util::Animation> m_Animation;

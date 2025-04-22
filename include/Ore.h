@@ -1,12 +1,12 @@
 #ifndef ORE_H
 #define ORE_H
-#include "IHittable.h"
+#include "Interface/IHittable.h"
+#include "Interface/IMoveable.h"
 #include "Util/GameObject.hpp"
 
 
-class Ore : public Util::GameObject, public IHittable
+class Ore : public Util::GameObject, public IHittable, public IMoveable
 {
-private:
     float m_Weight;
     int m_Money;
 
@@ -25,12 +25,17 @@ public:
         m_Money = money;
     }
 
-    void SetRotation(const float rotation) { m_Transform.rotation = rotation; }
-    [[nodiscard]] glm::vec2 GetPosition() const { return m_Transform.translation; }
-    void SetPosition(const glm::vec2 position) { m_Transform.translation = position; }
-    glm::vec2 GetCenterPoint() const override { return m_Transform.translation; }
     [[nodiscard]] float GetWeight() const { return m_Weight; }
     [[nodiscard]] int GetMoney() const { return m_Money; }
+
+    // Interface IMoveable
+    [[nodiscard]] glm::vec2 GetPosition() const final { return m_Transform.translation; }
+    void SetPosition(const glm::vec2& position) final { m_Transform.translation = position; }
+    void SetRotation(const float rotation) final { m_Transform.rotation = rotation; }
+
+    // Interface IHittable
+    [[nodiscard]] glm::vec2 GetHitBoxPosition() const final { return m_Transform.translation; }
+    [[nodiscard]] glm::vec2 GetHitBoxSize() const override = 0;
 };
 
 

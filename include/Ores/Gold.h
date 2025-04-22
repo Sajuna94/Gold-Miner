@@ -24,11 +24,11 @@ public:
             },
             true, 300, true, 300))
     {
-        m_Transform.translation = {0, 0};
-        m_ZIndex = 32;
         SetDrawable(m_Animation);
-        SetHitBox({0, 0}, {93, 93});
+        m_ZIndex = 32;
     }
+
+    [[nodiscard]] glm::vec2 GetHitBoxSize() const override { return {93, 93}; }
 
 private:
     std::shared_ptr<Util::Animation> m_Animation;

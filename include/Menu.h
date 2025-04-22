@@ -1,14 +1,14 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include "config.hpp"
 #include "Util/GameObject.hpp"
+#include "Util/Image.hpp"
 #include "Util/Renderer.hpp"
 
-class Menu
+class Menu : public Util::GameObject
 {
 public:
-    virtual ~Menu() = default;
-
     enum class Screen
     {
         START_MENU,
@@ -16,9 +16,14 @@ public:
         GAME_MENU,
     };
 
-    Util::Renderer* m_Root;
+    explicit Menu(const std::string& imagePath, const glm::vec2 position = {0, 0}) :
+        GameObject(std::make_unique<Util::Image>(imagePath), -5)
+    {
+        m_Transform.translation = position;
 
-    explicit Menu(Util::Renderer* root) { m_Root = root; }
+        glm::vec2 const size = m_Drawable->GetSize();
+        m_Transform.scale = {WINDOW_WIDTH / size.x, WINDOW_HEIGHT / size.y};
+    }
 
     virtual void Open() = 0;
     virtual void Update(App* app) = 0;

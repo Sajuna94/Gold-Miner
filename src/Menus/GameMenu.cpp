@@ -10,6 +10,8 @@
 #define HALF_WINDOW_WIDTH (WINDOW_WIDTH / 2)
 #define HALF_WINDOW_HEIGHT (WINDOW_HEIGHT / 2)
 
+#define MAX_ORE_COUNT 20
+
 namespace DefaultPosition
 {
     constexpr glm::vec2 Miner = {5.5, 255};
@@ -19,45 +21,30 @@ namespace DefaultPosition
 
 void GameMenu::Open()
 {
+    SetDrawable(std::make_shared<Util::Image>(RESOURCE_DIR"/Background/game_background.png"));
+
     printf("[~] Open GameMenu\n");
 
     m_Miner = std::make_shared<Miner>(DefaultPosition::Miner);
-    m_Root->AddChild(m_Miner);
-
-    m_Pickaxe = m_Miner->m_Pickaxe;
-    m_Rope = m_Miner->m_Rope;
-    m_Rope->SetScaleSize({3, 3});
-    m_Rope->SetZIndex(40);
-
-    // m_RedLine = std::make_shared<UI::Picture>(RESOURCE_DIR"/Color/red.png", DefaultPosition::Pickaxe);
-    // m_RedLine->SetScaleSize({1, 1500});
-    // m_RedLine->SetZIndex(39);
-    // m_Root->AddChild(m_RedLine);
+    AddChild(m_Miner);
 
     m_TimerText = std::make_shared<UI::Text>("TIME", 20);
     m_TimerText->SetPosition({HALF_WINDOW_WIDTH - m_TimerText->GetScaledSize().x, HALF_WINDOW_HEIGHT - 20});
-    m_Root->AddChild(m_TimerText);
+    AddChild(m_TimerText);
 
     m_MoneyText = std::make_shared<UI::Text>("0", 34);
     m_MoneyText->SetPosition(DefaultPosition::MoneyText);
     m_MoneyText->SetColor(Util::Color::FromRGB(110, 72, 34));
-    m_Root->AddChild(m_MoneyText);
+    AddChild(m_MoneyText);
 
     m_LevelText = std::make_shared<UI::Text>("1", 34);
     m_LevelText->SetPosition(DefaultPosition::LevelText);
     m_LevelText->SetColor(Util::Color::FromRGB(110, 72, 34));
-    m_Root->AddChild(m_LevelText);
+    AddChild(m_LevelText);
 
 
-    while (m_OreList.size() < 20)
-    {
-        int randomIndex = rand() % static_cast<int>(Ore::Type::Count);
-        GenerateOre(static_cast<Ore::Type>(randomIndex));
-    }
-    for (auto& ore : m_OreList)
-    {
-        m_Root->AddChild(ore);
-    }
+    for (int i = 0; i < MAX_ORE_COUNT; i++)
+        GenerateOre(static_cast<Ore::Type>(rand() % static_cast<int>(Ore::Type::Count)));
 
     printf("WINDOW_SIZE: %d, %d\n", WINDOW_WIDTH, WINDOW_HEIGHT);
 }
@@ -67,62 +54,45 @@ void GameMenu::Update(App* app)
     const float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;
     m_TimerText->SetText("FPS: " + std::to_string(1.0f / dt));
 
-    if (m_Pickaxe->GetState() == Pickaxe::State::THROWN)
-    {
-        if (IsOutOfWindow(*m_Pickaxe))
-            m_Pickaxe->Return();
-        for (const auto &ore : m_OreList)
-        {
-            if (ore->IsOverlappingWith(*m_Pickaxe))
-            {
-                m_Pickaxe->Return();
-                m_Pickaxe->SetDragOre(ore);
-            }
-        }
-    }
 
+    UpdateGameLogic(dt);
     m_Miner->Update(dt);
 }
 
-void GameMenu::UpdatePickaxe(const float dt)
+void GameMenu::UpdateGameLogic(const float dt)
 {
-    // m_RedLine->SetRotation(m_Pickaxe->GetRotation());
-
-    switch (m_Pickaxe->GetState())
+    switch (const auto pickaxe = m_Miner->GetPickaxe(); pickaxe->GetState())
     {
     case Pickaxe::State::STOP:
-        if (!Util::Input::IsKeyPressed(Util::Keycode::SPACE))
-            m_Pickaxe->UpdateAngle(dt);
+        if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB))
+            m_Miner->ThrowPickaxe();
+        if (Util::Input::IsKeyPressed(Util::Keycode::A))
+            m_Miner->Move(dt, -1);
+        if (Util::Input::IsKeyPressed(Util::Keycode::D))
+            m_Miner->Move(dt, 1);
         break;
     case Pickaxe::State::THROWN:
-        if (IsOutOfWindow(*m_Pickaxe))
-            m_Pickaxe->Return();
-        for (const auto& ore : m_OreList)
-        {
-            if (m_Pickaxe->IsOverlappingWith(*ore))
+        if (IsOutOfWindow(*pickaxe))
+            m_Miner->ReturnPickaxe();
+        for (const auto& hittable : m_HittableList)
+            if (pickaxe->IsOverlay(*hittable))
             {
-                m_Pickaxe->Return();
-                m_Pickaxe->SetDragOre(ore);
-                break;
+                if (const auto ore = std::dynamic_pointer_cast<Ore>(hittable))
+                    pickaxe->SetDragOre(ore);
+                m_Miner->ReturnPickaxe();
             }
-        }
         break;
     case Pickaxe::State::RETURN:
-        if (m_Pickaxe->GetPosition().y > m_ThrownPosition.y)
+        if (pickaxe->GetPosition().y >= m_Miner->GetThrownPosition().y)
         {
-            m_Pickaxe->SetPosition(m_ThrownPosition);
-            m_Pickaxe->Stop();
-
-            if (const auto& ore = m_Pickaxe->TakeDragOre())
+            if (const auto ore = pickaxe->TakeDragOre())
             {
-                // Get money
-                money += ore->GetMoney();
-                m_MoneyText->SetText(std::to_string(money));
-                printf("[$] Get %d$\n", ore->GetMoney());
-                // Remove Ore
-                m_OreList.remove(ore);
-                m_Root->RemoveChild(ore);
+                m_Money += ore->GetMoney();
+                m_MoneyText->SetText(std::to_string(m_Money));
+                RemoveChild(ore);
+                m_HittableList.remove(ore);
             }
+            m_Miner->StopPickaxe();
         }
         break;
     }
@@ -131,11 +101,9 @@ void GameMenu::UpdatePickaxe(const float dt)
 void GameMenu::Close()
 {
     printf("[~] Close GameMenu\n");
-
-    for (auto& ore : m_OreList)
-    {
-        m_Root->RemoveChild(ore);
-    }
+    auto children = GetChildren();
+    for (const auto& child : children)
+        RemoveChild(child);
 }
 
 void GameMenu::GenerateOre(const Ore::Type type)
@@ -161,11 +129,14 @@ void GameMenu::GenerateOre(const Ore::Type type)
 
         if (IsOutOfWindow(*ore))
             continue;
-        if (std::any_of(m_OreList.begin(), m_OreList.end(),
-                        [&](const auto& other) { return other->IsOverlappingWith(*ore); }))
+        if (std::any_of(m_HittableList.begin(), m_HittableList.end(), [&](const auto& other)
+        {
+            return other->IsOverlay(*ore);
+        }))
             continue;
 
-        m_OreList.push_back(ore);
+        AddChild(ore);
+        m_HittableList.push_back(ore);
         break;
     }
 }
