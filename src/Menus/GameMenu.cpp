@@ -4,6 +4,7 @@
 #include "Util/Input.hpp"
 #include <iostream>
 
+#include "Bomb.h"
 #include "Ores/Gold.h"
 #include "Ores/Rock.h"
 
@@ -43,8 +44,10 @@ void GameMenu::Open()
     AddChild(m_LevelText);
 
 
-    for (int i = 0; i < MAX_ORE_COUNT; i++)
-        GenerateOre(static_cast<Ore::Type>(rand() % static_cast<int>(Ore::Type::Count)));
+    for (int i = 0; i < MAX_ORE_COUNT + 20; i++)
+        TryPlaceObject(std::make_shared<Diamond>());
+    for (int i = 0; i < 10; i++)
+        TryPlaceObject(std::make_shared<Bomb>());
 
     printf("WINDOW_SIZE: %d, %d\n", WINDOW_WIDTH, WINDOW_HEIGHT);
 }
@@ -56,22 +59,48 @@ void GameMenu::Update(App* app)
 
 
     UpdateGameLogic(dt);
-    m_Miner->Update(dt);
 }
 
 void GameMenu::UpdateGameLogic(const float dt)
 {
+    m_Miner->Update(dt);
+    for (const auto& hittable : m_HittableList)
+    {
+        if (const auto bomb = std::dynamic_pointer_cast<Bomb>(hittable))
+        {
+            if (bomb->IsExplosionFinished())
+            {
+                m_RemovableList.push_back(bomb);
+                for (const auto& other : m_HittableList)
+                {
+                    if (bomb == other)
+                        continue;
+                    if (bomb->IsInExplosionRange(other))
+                    {
+                        if (const auto otherBomb = std::dynamic_pointer_cast<Bomb>(other))
+                            otherBomb->Explosion();
+                        else
+                            m_RemovableList.push_back(other);
+                    }
+                }
+            }
+        }
+    }
     switch (const auto pickaxe = m_Miner->GetPickaxe(); pickaxe->GetState())
     {
     case Pickaxe::State::STOP:
-        if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB))
-            m_Miner->ThrowPickaxe();
+        if (!Util::Input::IsKeyPressed(Util::Keycode::SPACE))
+            pickaxe->UpdateAngle(dt);
         if (Util::Input::IsKeyPressed(Util::Keycode::A))
             m_Miner->Move(dt, -1);
         if (Util::Input::IsKeyPressed(Util::Keycode::D))
             m_Miner->Move(dt, 1);
+        if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB))
+            m_Miner->ThrowPickaxe();
         break;
     case Pickaxe::State::THROWN:
+        if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_RB))
+            m_Miner->ReturnPickaxe();
         if (IsOutOfWindow(*pickaxe))
             m_Miner->ReturnPickaxe();
         for (const auto& hittable : m_HittableList)
@@ -79,7 +108,10 @@ void GameMenu::UpdateGameLogic(const float dt)
             {
                 if (const auto ore = std::dynamic_pointer_cast<Ore>(hittable))
                     pickaxe->SetDragOre(ore);
+                else if (const auto bomb = std::dynamic_pointer_cast<Bomb>(hittable))
+                    bomb->Explosion();
                 m_Miner->ReturnPickaxe();
+                break;
             }
         break;
     case Pickaxe::State::RETURN:
@@ -89,12 +121,17 @@ void GameMenu::UpdateGameLogic(const float dt)
             {
                 m_Money += ore->GetMoney();
                 m_MoneyText->SetText(std::to_string(m_Money));
-                RemoveChild(ore);
-                m_HittableList.remove(ore);
+                m_RemovableList.push_back(ore);
             }
             m_Miner->StopPickaxe();
         }
         break;
+    }
+    for (const auto& removeItem : m_RemovableList)
+    {
+        if (auto item = std::dynamic_pointer_cast<GameObject>(removeItem))
+            RemoveChild(item);
+        m_HittableList.remove(removeItem);
     }
 }
 
@@ -106,42 +143,32 @@ void GameMenu::Close()
         RemoveChild(child);
 }
 
-void GameMenu::GenerateOre(const Ore::Type type)
+template <typename T>
+void GameMenu::TryPlaceObject(std::shared_ptr<T> object)
 {
-    std::shared_ptr<Ore> ore;
-    switch (type)
-    {
-    case Ore::Type::ROCK: ore = std::make_shared<Rock>();
-        break;
-    case Ore::Type::GOLD: ore = std::make_shared<Gold>();
-        break;
-    case Ore::Type::DIAMOND: ore = std::make_shared<Diamond>();
-        break;
-    default: break;
-    }
+    static_assert(std::is_base_of_v<IMoveable, T>, "T must inherit from IMoveable");
+    static_assert(std::is_base_of_v<IHittable, T>, "T must inherit from IHittable");
 
     while (true)
     {
-        ore->SetPosition({
+        object->SetPosition({
             RandInRange(-HALF_WINDOW_WIDTH, HALF_WINDOW_WIDTH),
             RandInRange(-HALF_WINDOW_HEIGHT, HALF_WINDOW_HEIGHT - 250)
         });
 
-        if (IsOutOfWindow(*ore))
+        if (IsOutOfWindow(*object))
             continue;
-        if (std::any_of(m_HittableList.begin(), m_HittableList.end(), [&](const auto& other)
-        {
-            return other->IsOverlay(*ore);
-        }))
+        if (std::any_of(m_HittableList.begin(), m_HittableList.end(),
+                        [&](const auto& other) { return other->IsOverlay(*object); }))
             continue;
 
-        AddChild(ore);
-        m_HittableList.push_back(ore);
+        AddChild(object);
+        m_HittableList.push_back(object);
         break;
     }
 }
 
-bool GameMenu::IsOutOfWindow(const Util::GameObject& object)
+bool GameMenu::IsOutOfWindow(const GameObject& object)
 {
     const glm::vec2 centerPt = object.GetTransform().translation;
     const glm::vec2 halfEdgeSize = (glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) - object.GetScaledSize()) * 0.5f;

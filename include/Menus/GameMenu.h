@@ -15,6 +15,8 @@ class GameMenu final : public Menu
     int m_Money = 0;
     std::list<std::shared_ptr<Ore>> m_OreList;
     std::list<std::shared_ptr<IHittable>> m_HittableList;
+    std::list<std::shared_ptr<IHittable>> m_RemovableList;
+
 
     std::shared_ptr<UI::Text> m_TimerText;
     std::shared_ptr<UI::Text> m_MoneyText;
@@ -34,8 +36,10 @@ public:
 private:
     [[nodiscard]] static bool IsOutOfWindow(const Util::GameObject& object);
     static int RandInRange(const int min, const int max) { return rand() % (max - min + 1) + min; }
-    void GenerateOre(Ore::Type type);
     void UpdateGameLogic(float dt);
+
+    template <typename T>
+    void TryPlaceObject(std::shared_ptr<T> object);
 };
 
 

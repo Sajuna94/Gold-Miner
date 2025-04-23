@@ -33,13 +33,8 @@ Miner::Miner(const glm::vec2 position): GameObject(
 
 void Miner::Update(const float dt) const
 {
-    switch (m_Pickaxe->GetState())
+    if (m_Pickaxe->GetState() != Pickaxe::State::STOP)
     {
-    case Pickaxe::State::STOP:
-        if (!Util::Input::IsKeyPressed(Util::Keycode::SPACE))
-            m_Pickaxe->UpdateAngle(dt);
-        break;
-    default:
         m_Pickaxe->UpdateNextMove(dt);
         m_Rope->SetPosition((m_ThrownPosition + m_Pickaxe->GetPosition()) * 0.5f);
         m_Rope->SetScaleSize({3, glm::length(m_ThrownPosition - m_Pickaxe->GetPosition())});

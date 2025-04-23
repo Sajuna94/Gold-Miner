@@ -44,10 +44,17 @@ void Pickaxe::UpdateNextMove(const float dt)
 
 void Pickaxe::UpdateAngle(const float dt)
 {
-    angle += direction * rotateSpeed;
+    angle += direction * m_RotateSpeed * dt;
 
-    if (angle < -85.0f) direction = 1.0f;
-    if (85.0f < angle) direction = -1.0f;
-
-    m_Transform.rotation = angle * dt;
+    if (angle <= -85.0f)
+    {
+        direction = 1.0f;
+        angle = -85.0f;
+    }
+    else if (85.0f < angle)
+    {
+        direction = -1.0f;
+        angle = 85.0f;
+    }
+    m_Transform.rotation = glm::radians(angle);
 }

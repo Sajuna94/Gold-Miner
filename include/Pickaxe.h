@@ -50,7 +50,7 @@ public:
     glm::vec2 GetHitBoxSize() const override { return {30, 15}; }
 
 private:
-    float m_MoveSpeed = 300.0f, m_RotateSpeed = 1.8f;
+    float m_MoveSpeed = 300.0f, m_RotateSpeed = 100.0f;
     Direction m_Direction = Direction::LEFT;
 
 
