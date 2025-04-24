@@ -25,8 +25,10 @@ public:
         m_Money = money;
     }
 
-    [[nodiscard]] float GetWeight() const { return m_Weight; }
-    [[nodiscard]] int GetMoney() const { return m_Money; }
+    static int RandInRange(const int min, const int max) { return rand() % (max - min + 1) + min; }
+
+    [[nodiscard]] float GetWeight() const { return m_Weight * m_Transform.scale.x; }
+    [[nodiscard]] virtual int GetMoney() const { return m_Money * m_Transform.scale.x; }
 
     // Interface IMoveable
     [[nodiscard]] glm::vec2 GetPosition() const final { return m_Transform.translation; }

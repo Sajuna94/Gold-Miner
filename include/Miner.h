@@ -5,6 +5,7 @@
 #include "UI/Picture.h"
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
+#include "Util/SFX.hpp"
 
 class Miner final : public Util::GameObject
 {

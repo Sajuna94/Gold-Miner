@@ -54,7 +54,7 @@ private:
     Direction m_Direction = Direction::LEFT;
 
 
-    float angle = 0.0f, rotateSpeed = 1.8f, direction = 1.0f;
+    float angle = 0.0f, direction = 1.0f;
     float moveSpeed = 300.0f;
 };
 

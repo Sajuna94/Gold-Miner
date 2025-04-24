@@ -1,10 +1,10 @@
 #include "Menus/GameMenu.h"
 #include "App.hpp"
-#include "UI/Text.h"
 #include "Util/Input.hpp"
 #include <iostream>
 
 #include "Bomb.h"
+#include "Ores/Diamond.h"
 #include "Ores/Gold.h"
 #include "Ores/Rock.h"
 
@@ -44,10 +44,23 @@ void GameMenu::Open()
     AddChild(m_LevelText);
 
 
-    for (int i = 0; i < MAX_ORE_COUNT + 20; i++)
-        TryPlaceObject(std::make_shared<Diamond>());
-    for (int i = 0; i < 10; i++)
-        TryPlaceObject(std::make_shared<Bomb>());
+    std::list<std::shared_ptr<GameObject>> presetObjects;
+
+    for (int i = 0; i < 20; ++i) presetObjects.push_back(std::make_shared<Gold>());
+    for (int i = 0; i < 5; ++i) presetObjects.push_back(std::make_shared<Rock>());
+    for (int i = 0; i < 5; ++i) presetObjects.push_back(std::make_shared<Bomb>());
+    for (int i = 0; i < 10; ++i) presetObjects.push_back(std::make_shared<Diamond>());
+
+    presetObjects.sort([](const auto& a, const auto& b)
+    {
+        auto aSize = a->GetScaledSize();
+        auto bSize = b->GetScaledSize();
+        return aSize.x * aSize.y > bSize.x * bSize.y;
+    });
+    for (const auto& obj : presetObjects)
+        TryPlaceObject(obj);
+    presetObjects.clear();
+
 
     printf("WINDOW_SIZE: %d, %d\n", WINDOW_WIDTH, WINDOW_HEIGHT);
 }
@@ -57,35 +70,60 @@ void GameMenu::Update(App* app)
     const float dt = Util::Time::GetDeltaTimeMs() / 1000.0f;
     m_TimerText->SetText("FPS: " + std::to_string(1.0f / dt));
 
-
     UpdateGameLogic(dt);
 }
 
 void GameMenu::UpdateGameLogic(const float dt)
 {
     m_Miner->Update(dt);
-    for (const auto& hittable : m_HittableList)
+    UpdatePickaxe(dt);
+
+    m_Manager->Update(m_HittableList);
+    for (const auto& removable : m_Manager->GetRemovableList())
     {
-        if (const auto bomb = std::dynamic_pointer_cast<Bomb>(hittable))
-        {
-            if (bomb->IsExplosionFinished())
-            {
-                m_RemovableList.push_back(bomb);
-                for (const auto& other : m_HittableList)
-                {
-                    if (bomb == other)
-                        continue;
-                    if (bomb->IsInExplosionRange(other))
-                    {
-                        if (const auto otherBomb = std::dynamic_pointer_cast<Bomb>(other))
-                            otherBomb->Explosion();
-                        else
-                            m_RemovableList.push_back(other);
-                    }
-                }
-            }
-        }
+        if (const auto hittable = std::dynamic_pointer_cast<IHittable>(removable))
+            m_HittableList.remove(hittable);
+        RemoveChild(removable);
     }
+}
+
+void GameMenu::Close()
+{
+    printf("[~] Close GameMenu\n");
+    auto children = GetChildren();
+    for (const auto& child : children)
+        RemoveChild(child);
+}
+
+void GameMenu::TryPlaceObject(const std::shared_ptr<GameObject>& object)
+{
+    const auto moveable = std::dynamic_pointer_cast<IMoveable>(object);
+    const auto hittable = std::dynamic_pointer_cast<IHittable>(object);
+
+    int tryingCount = 0;
+    while (tryingCount < 20)
+    {
+        tryingCount++;
+
+        moveable->SetPosition({
+            RandInRange(-HALF_WINDOW_WIDTH, HALF_WINDOW_WIDTH),
+            RandInRange(-HALF_WINDOW_HEIGHT, HALF_WINDOW_HEIGHT - 250)
+        });
+
+        if (IsOutOfWindow(*object))
+            continue;
+        if (std::any_of(m_HittableList.begin(), m_HittableList.end(),
+                        [&](const auto& other) { return other->IsOverlay(*hittable); }))
+            continue;
+
+        AddChild(object);
+        m_HittableList.push_back(hittable);
+        break;
+    }
+}
+
+void GameMenu::UpdatePickaxe(float dt)
+{
     switch (const auto pickaxe = m_Miner->GetPickaxe(); pickaxe->GetState())
     {
     case Pickaxe::State::STOP:
@@ -109,7 +147,10 @@ void GameMenu::UpdateGameLogic(const float dt)
                 if (const auto ore = std::dynamic_pointer_cast<Ore>(hittable))
                     pickaxe->SetDragOre(ore);
                 else if (const auto bomb = std::dynamic_pointer_cast<Bomb>(hittable))
+                {
                     bomb->Explosion();
+                    m_Manager->PushHandle(bomb);
+                }
                 m_Miner->ReturnPickaxe();
                 break;
             }
@@ -120,53 +161,16 @@ void GameMenu::UpdateGameLogic(const float dt)
             if (const auto ore = pickaxe->TakeDragOre())
             {
                 m_Money += ore->GetMoney();
+                m_Manager->PushRemovable(ore);
                 m_MoneyText->SetText(std::to_string(m_Money));
-                m_RemovableList.push_back(ore);
+                m_MoneyEffectSound->Play();
             }
             m_Miner->StopPickaxe();
         }
         break;
     }
-    for (const auto& removeItem : m_RemovableList)
-    {
-        if (auto item = std::dynamic_pointer_cast<GameObject>(removeItem))
-            RemoveChild(item);
-        m_HittableList.remove(removeItem);
-    }
 }
 
-void GameMenu::Close()
-{
-    printf("[~] Close GameMenu\n");
-    auto children = GetChildren();
-    for (const auto& child : children)
-        RemoveChild(child);
-}
-
-template <typename T>
-void GameMenu::TryPlaceObject(std::shared_ptr<T> object)
-{
-    static_assert(std::is_base_of_v<IMoveable, T>, "T must inherit from IMoveable");
-    static_assert(std::is_base_of_v<IHittable, T>, "T must inherit from IHittable");
-
-    while (true)
-    {
-        object->SetPosition({
-            RandInRange(-HALF_WINDOW_WIDTH, HALF_WINDOW_WIDTH),
-            RandInRange(-HALF_WINDOW_HEIGHT, HALF_WINDOW_HEIGHT - 250)
-        });
-
-        if (IsOutOfWindow(*object))
-            continue;
-        if (std::any_of(m_HittableList.begin(), m_HittableList.end(),
-                        [&](const auto& other) { return other->IsOverlay(*object); }))
-            continue;
-
-        AddChild(object);
-        m_HittableList.push_back(object);
-        break;
-    }
-}
 
 bool GameMenu::IsOutOfWindow(const GameObject& object)
 {
@@ -175,4 +179,56 @@ bool GameMenu::IsOutOfWindow(const GameObject& object)
     return
         any(lessThan(centerPt, -halfEdgeSize)) ||
         any(greaterThan(centerPt, halfEdgeSize));
+}
+
+void GameManager::Update(const std::list<std::shared_ptr<IHittable>>& hittableList)
+{
+    const auto temp = m_HandleList;
+    for (const auto& handle : temp)
+    {
+        if (const auto bomb = std::dynamic_pointer_cast<Bomb>(handle))
+            if (HandleChainExplosion(bomb, hittableList))
+                m_HandleList.remove(bomb);
+    }
+}
+
+bool GameManager::HandleChainExplosion(const std::shared_ptr<Bomb>& bomb,
+                                       const std::list<std::shared_ptr<IHittable>>& hittableList)
+{
+    if (!bomb->IsBlownUp())
+        return false;
+
+    PushRemovable(bomb);
+    for (const auto& hittable : hittableList)
+    {
+        if (bomb->InTheBlowRange(hittable))
+        {
+            if (const auto otherBomb = std::dynamic_pointer_cast<Bomb>(hittable))
+            {
+                if (otherBomb->IsBlownUp())
+                    continue;
+                otherBomb->Explosion();
+                PushHandle(otherBomb);
+            }
+            else
+                PushRemovable(std::dynamic_pointer_cast<Util::GameObject>(hittable));
+        }
+    }
+    return true;
+}
+
+
+void GameManager::PushHandle(const std::shared_ptr<Util::GameObject>& handle)
+{
+    m_HandleList.push_back(handle);
+}
+
+void GameManager::PushRemovable(const std::shared_ptr<Util::GameObject>& removable)
+{
+    m_RemovableList.push_back(removable);
+}
+
+std::list<std::shared_ptr<Util::GameObject>> GameManager::GetRemovableList()
+{
+    return m_RemovableList;
 }

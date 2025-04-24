@@ -8,7 +8,7 @@ class Diamond final : public Ore
 {
 public:
     explicit Diamond():
-        Ore(5, 100),
+        Ore(5, 500),
         m_Animation(std::make_shared<Util::Animation>(
             std::vector<std::string>{
                 RESOURCE_DIR"/Ore/Diamond/diamond-1.png",
