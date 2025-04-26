@@ -1,7 +1,7 @@
 #ifndef STARTMENU_H
 #define STARTMENU_H
 
-#include "Menu.h"
+#include "Core/Menu.h"
 #include "UI/Button.h"
 #include "UI/Picture.h"
 
@@ -12,7 +12,7 @@ private:
     std::shared_ptr<UI::Picture> m_MinerPicture;
 
 public:
-    StartMenu() : Menu(RESOURCE_DIR"/image/background.png")
+    StartMenu() : Menu(RESOURCE_DIR"/Background/background.png")
     {
     }
 

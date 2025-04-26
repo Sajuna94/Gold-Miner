@@ -3,22 +3,20 @@
 
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
-#include "Interface/IClickable.h"
+#include "Core/Interfaces/IClickable.h"
 
 namespace UI
 {
     class Button final : public Util::GameObject, public IClickable
     {
     public:
-        explicit Button(const std::string& imagePath)
-            : GameObject(std::make_unique<Util::Image>(imagePath), 10)
+        explicit Button(const std::string& imagePath, const int zIndex)
+            : GameObject(std::make_unique<Util::Image>(imagePath), zIndex)
         {
         }
 
         void SetPosition(const glm::vec2& Position) { m_Transform.translation = Position; }
         [[nodiscard]] const glm::vec2& GetPosition() const { return m_Transform.translation; }
-
-        void Click() override;
 
         [[nodiscard]] bool IsClicked() override;
 

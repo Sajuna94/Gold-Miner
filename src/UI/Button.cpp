@@ -3,10 +3,6 @@
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 
-void UI::Button::Click()
-{
-}
-
 bool UI::Button::IsClicked()
 {
     if (!waitingMouseUp && Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover())

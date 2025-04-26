@@ -1,6 +1,6 @@
 #ifndef PICTURE_H
 #define PICTURE_H
-#include "Interface/IMoveable.h"
+#include "Core/Interfaces/IMoveable.h"
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
 
@@ -9,10 +9,9 @@ namespace UI
     class Picture final : public Util::GameObject, public IMoveable
     {
     public:
-        explicit Picture(const std::string& imagePath, const glm::vec2 position = {0, 0}) : GameObject(
-            std::make_unique<Util::Image>(imagePath), 5)
+        explicit Picture(const std::string& imagePath, const int zIndex) : GameObject(
+            std::make_unique<Util::Image>(imagePath), zIndex)
         {
-            m_Transform.translation = position;
         }
 
         void SetScaleSize(const glm::vec2 scale) { m_Transform.scale = scale; }

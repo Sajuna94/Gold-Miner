@@ -4,7 +4,7 @@
 #include "pch.hpp" // IWYU pragma: export
 
 #include "Util/Renderer.hpp"
-#include "Menu.h"
+#include "Core/Menu.h"
 
 class App
 {

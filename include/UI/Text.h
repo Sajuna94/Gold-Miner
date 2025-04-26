@@ -1,7 +1,7 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include "Interface/IMoveable.h"
+#include "Core/Interfaces/IMoveable.h"
 #include "Util/GameObject.hpp"
 #include "Util/Text.hpp"
 #include "Util/Color.hpp"

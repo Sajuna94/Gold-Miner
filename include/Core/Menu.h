@@ -3,8 +3,8 @@
 
 #include "config.hpp"
 #include "Util/GameObject.hpp"
-#include "Util/Image.hpp"
 #include "Util/Renderer.hpp"
+#include "Util/Image.hpp"
 
 class Menu : public Util::GameObject
 {
