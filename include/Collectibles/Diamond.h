@@ -2,6 +2,7 @@
 #define DIAMOND_H
 #include "Core/Entity.h"
 #include "Core/Interfaces/IGrabbable.h"
+#include "Util/Animation.hpp"
 
 class Diamond final : public Entity, public IGrabbable
 {

@@ -4,19 +4,19 @@
 class Timer
 {
 public:
-    explicit Timer(int startTime, bool countDown = false);
+    explicit Timer(int startSeconds, int intervalMs);
 
     void Update(float dt);
 
     bool Event();
 
-    [[nodiscard]] int GetTimer() const;
+    [[nodiscard]] int GetSecond() const;
 
 private:
-    const int m_InitialTime;
-    bool m_CountDown;
-    float m_Time;
-    int m_LastSecond;
+    const int m_InitialSeconds;
+    const float m_Interval;
+    float m_ElapsedSeconds;
+    int m_LastTriggerCount = 0;
 };
 
 

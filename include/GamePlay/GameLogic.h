@@ -1,9 +1,9 @@
 #ifndef GAMELOGIC_H
 #define GAMELOGIC_H
-#include <list>
 #include <memory>
-#include <queue>
+#include <unordered_set>
 
+#include "EntitySpawner.h"
 #include "Miner.h"
 #include "Core/Entity.h"
 #include "Timer.h"
@@ -16,7 +16,6 @@ struct InputState
     bool ThrowPickaxe = false;
     bool ReturnPickaxe = false;
 };
-
 
 class GameLogic
 {
@@ -37,49 +36,53 @@ public:
     };
 
 private:
-    // Game Adapter
-    State m_State = State::PAUSED;
-    std::vector<CommandType> m_CommandBuffer;
+    State m_GameState = State::PAUSED;
 
-    // Children List
-    std::vector<std::shared_ptr<Util::GameObject>> m_AddableList;
-    std::vector<std::shared_ptr<Util::GameObject>> m_RemovableList;
+    // Game Adapter
+    std::vector<CommandType> m_CommandBuffer;
+    std::vector<std::shared_ptr<Util::GameObject>> m_AddableBuffer;
+    std::vector<std::shared_ptr<Util::GameObject>> m_RemovableBuffer;
+
+    // Entity Control
+    std::shared_ptr<EntitySpawner> m_EntitySpawner;
+    std::unordered_set<std::shared_ptr<Entity>> m_HandleEntityList;
 
     // Timer
     std::shared_ptr<Timer> m_Timer;
     int m_TimeLeft{}, m_TimeSpawn{};
 
-    // Spawn Logic
-    std::queue<std::shared_ptr<Entity>> m_SpawnQueue;
-    std::list<std::shared_ptr<Entity>> m_PlacedEntityList;
-
     //
-    std::list<std::shared_ptr<Bomb>> m_BombHandleList;
     std::shared_ptr<Miner> m_Miner;
     int m_Money{};
 
 public:
-    // Control
+    // Game State Control
     void GameStart();
     void Update(float dt, const InputState& input);
     void GameOver();
 
-    // Extract
+    // Extract Buffer
     std::vector<CommandType> ExtractCommands();
     std::vector<std::shared_ptr<Util::GameObject>> ExtractAddedChildren();
     std::vector<std::shared_ptr<Util::GameObject>> ExtractRemovedChildren();
 
     // Getter
     [[nodiscard]] int GetMoney() const { return m_Money; }
-    [[nodiscard]] State GetState() const { return m_State; }
+    [[nodiscard]] State GetState() const { return m_GameState; }
     [[nodiscard]] int GetTimeLeft() const { return m_TimeLeft; }
 
 private:
-    void TrySpawnEntities();
-    static std::shared_ptr<Entity> CreateRandomCollectible();
-
+    // Handle Game State
     void HandleGameCycle(float dt);
-    void HandleBombExplosion();
+
+    // Spawn Logic
+    void HandleEntitySpawn();
+
+    // Entity Update Unit
+    void HandleEntityCycle();
+    void HandleBombExplosion(const std::shared_ptr<Bomb>& bomb);
+
+    // Miner Update Logic
     void HandleMinerState(float dt, const InputState& input);
 };
 

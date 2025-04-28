@@ -1,36 +1,28 @@
 #include "GamePlay/Timer.h"
 
-Timer::Timer(const int startTime, const bool countDown)
-    : m_InitialTime(startTime),
-      m_CountDown(countDown),
-      m_Time(static_cast<float>(startTime)),
-      m_LastSecond(GetTimer())
+Timer::Timer(const int startSeconds, const int intervalMs)
+    : m_InitialSeconds(startSeconds),
+      m_Interval(static_cast<float>(intervalMs) / 1000.0f),
+      m_ElapsedSeconds(static_cast<float>(startSeconds))
 {
 }
 
 void Timer::Update(const float dt)
 {
-    if (m_CountDown)
-    {
-        m_Time -= dt;
-        if (m_Time <= 0)
-            m_Time = 0;
-    }
-    else
-        m_Time += dt;
+    m_ElapsedSeconds += dt;
 }
 
 bool Timer::Event()
 {
-    if (const int currentSecond = GetTimer(); currentSecond != m_LastSecond)
+    if (static_cast<int>(m_ElapsedSeconds / m_Interval) > m_LastTriggerCount)
     {
-        m_LastSecond = currentSecond;
+        m_LastTriggerCount += 1;
         return true;
     }
     return false;
 }
 
-int Timer::GetTimer() const
+int Timer::GetSecond() const
 {
-    return static_cast<int>(m_Time);
+    return static_cast<int>(m_ElapsedSeconds);
 }
