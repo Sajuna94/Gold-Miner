@@ -14,6 +14,7 @@ class GameMenu final : public Menu
     std::shared_ptr<GameLogic> m_GameLogic;
 
     std::shared_ptr<UI::Text> m_FPSText;
+
     std::shared_ptr<UI::Text> m_MoneyText;
     std::shared_ptr<UI::Text> m_TargetText;
     std::shared_ptr<UI::Text> m_TimeLeftText;
@@ -22,6 +23,8 @@ class GameMenu final : public Menu
     std::shared_ptr<Util::SFX> m_MoneyEffectSound;
     std::shared_ptr<Util::SFX> m_RubberRopeSound;
     // std::shared_ptr<Util::SFX> m_BackgroundMusic;
+
+    std::unordered_set<std::shared_ptr<std::pair<float, std::shared_ptr<UI::Text>>>> m_TextAnimeBuffer;
 
 public:
     GameMenu() : Menu(RESOURCE_DIR"/Background/game_background.png")
@@ -45,6 +48,8 @@ public:
 
 private:
     void HandleCommand(GameLogic::CommandType command);
+
+    void AnimeAddedMoney(float dt);
 };
 
 

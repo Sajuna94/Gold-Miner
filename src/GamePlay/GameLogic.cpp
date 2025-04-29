@@ -145,6 +145,7 @@ void GameLogic::HandleMinerState(const float dt, const InputState& input)
                 m_RemovableBuffer.push_back(grabItem);
                 m_EntitySpawner->GetSpawnedEntities().erase(grabItem);
                 m_Money += grabbable->GetMoney();
+                m_LastAddedMoney = grabbable->GetMoney();
                 m_CommandBuffer.push_back(CommandType::AddMoney);
             }
         }

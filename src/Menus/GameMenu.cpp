@@ -10,6 +10,8 @@ constexpr int HALF_WINDOW_HEIGHT = WINDOW_HEIGHT / 2;
 namespace DefaultPosition
 {
     constexpr glm::vec2 MoneyText = {-495, HALF_WINDOW_HEIGHT - 89};
+    constexpr glm::vec2 AddedMoneyText = {0, 100};
+    constexpr glm::vec2 LastAddedMoneyText = {0, 100};
     constexpr glm::vec2 TargetText = {-495, HALF_WINDOW_HEIGHT - 137.5};
     constexpr glm::vec2 LevelText = {520, HALF_WINDOW_HEIGHT - 49};
     constexpr glm::vec2 CountDownText = {505, HALF_WINDOW_HEIGHT - 106.5};
@@ -26,6 +28,12 @@ void GameMenu::Open()
     m_FPSText = std::make_shared<UI::Text>("TIME", 20);
     m_FPSText->SetPosition({HALF_WINDOW_WIDTH - m_FPSText->GetScaledSize().x, HALF_WINDOW_HEIGHT - 20});
     AddChild(m_FPSText);
+
+    // m_AddedMoneyText = std::make_shared<UI::Text>("000", 90);
+    // m_AddedMoneyText->SetPosition(DefaultPosition::AddedMoneyText);
+    // m_AddedMoneyText->SetColor(Util::Color::FromRGB(69, 95, 47));
+    // m_AddedMoneyText->SetVisible(false);
+    // AddChild(m_AddedMoneyText);
 
     m_MoneyText = std::make_shared<UI::Text>("0", 34);
     m_MoneyText->SetPosition(DefaultPosition::MoneyText);
@@ -68,6 +76,8 @@ void GameMenu::Update(App* app)
     //         if (const auto& entity = std::dynamic_pointer_cast<Entity>(child))
     //             entity->Move({-1, 0});
 
+    AnimeAddedMoney(dt);
+
     if (m_GameLogic->GetState() == GameLogic::State::RUNNING)
         m_GameLogic->Update(dt, input);
     for (const auto& command : m_GameLogic->ExtractCommands())
@@ -87,9 +97,17 @@ void GameMenu::HandleCommand(const GameLogic::CommandType command)
             RemoveChild(child);
         return;
     case GameLogic::CommandType::AddMoney:
-        m_MoneyEffectSound->Play();
-        m_MoneyText->SetText(std::to_string(m_GameLogic->GetMoney()));
-        return;
+        {
+            m_MoneyEffectSound->Play();
+            auto lastAddedMoneyText = std::make_shared<UI::Text>("000", 90);
+            lastAddedMoneyText->SetText(std::to_string(m_GameLogic->GetLastAddedMoney()));
+            lastAddedMoneyText->SetPosition(DefaultPosition::LastAddedMoneyText);
+            lastAddedMoneyText->SetColor(Util::Color::FromRGB(69, 95, 47));
+            AddChild(lastAddedMoneyText);
+            m_TextAnimeBuffer.insert(
+                std::make_shared<std::pair<float, std::shared_ptr<UI::Text>>>(0.0f, lastAddedMoneyText));
+            return;
+        }
     case GameLogic::CommandType::UpdateTimeLeft:
         m_TimeLeftText->SetText(std::to_string(m_GameLogic->GetTimeLeft()));
     }
@@ -102,6 +120,58 @@ void GameMenu::Close()
     for (const auto& child : children)
         RemoveChild(child);
 }
+
+void GameMenu::AnimeAddedMoney(const float dt)
+{
+    const auto copyBuffer = m_TextAnimeBuffer;
+
+    for (auto& animeData : copyBuffer)
+    {
+        auto& elapsedTime = animeData->first;
+        auto& moneyText = animeData->second;
+
+        if (elapsedTime <= 0.5f)
+        {
+            elapsedTime += dt;
+            continue;
+        }
+
+        constexpr glm::vec2 startPos = DefaultPosition::AddedMoneyText;
+        constexpr glm::vec2 targetPos = DefaultPosition::MoneyText + glm::vec2(120, 0);
+        const glm::vec2 curPos = moneyText->GetPosition();
+
+        constexpr glm::vec2 totalVec = targetPos - startPos;
+        const glm::vec2 movedVec = curPos - startPos;
+
+        float progress = glm::dot(movedVec, totalVec) / glm::dot(totalVec, totalVec);
+        progress = glm::clamp(progress, 0.0f, 1.0f); // 避免超過
+
+        if (progress >= 1.0f)
+        {
+            if (elapsedTime <= 1.5f)
+            {
+                elapsedTime += dt;
+                continue;
+            }
+            m_MoneyText->SetText(std::to_string(
+                    std::stoi(moneyText->GetText()) +
+                    std::stoi(m_MoneyText->GetText()))
+            );
+            RemoveChild(moneyText);
+            m_TextAnimeBuffer.erase(animeData);
+            continue;
+        }
+
+        // Compute scale size
+        const float size = glm::mix(1.0f, 0.7f, progress);
+        moneyText->m_Transform.scale = glm::vec2(size);
+
+        const glm::vec2 direction = glm::normalize(totalVec);
+        constexpr float speed = 300.0f;
+        moneyText->Move(direction * speed, dt);
+    }
+}
+
 
 // bool GameMenu::IsOutOfWindow(const GameObject& object)
 // {

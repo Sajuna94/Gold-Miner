@@ -15,18 +15,23 @@ namespace UI
 
     private:
         Type m_CurrentType = Type::MID;
+        std::string m_Text;
 
     public:
-        Text(const std::string& text, const int size) : GameObject(
-            std::make_unique<Util::Text>(RESOURCE_DIR"/Font/Caveat-Bold.ttf", size, text,
-                                         Util::Color::FromName(Util::Colors::WHITE)),
-            100
-        )
+        Text(const std::string& text, const int size)
+            : GameObject(
+                  std::make_unique<Util::Text>(RESOURCE_DIR"/Font/Caveat-Bold.ttf", size, text,
+                                               Util::Color::FromName(Util::Colors::WHITE))
+                  ,
+                  100
+              ),
+              m_Text(text)
         {
         }
 
         void SetText(const std::string& text)
         {
+            m_Text = text;
             const float tempWidth = GetScaledSize().x;
 
             const auto temp = std::dynamic_pointer_cast<Util::Text>(m_Drawable);
@@ -40,6 +45,8 @@ namespace UI
             default: break;
             }
         }
+
+        std::string GetText() const { return m_Text; }
 
         void SetType(const Type type)
         {

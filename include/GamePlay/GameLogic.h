@@ -54,7 +54,7 @@ private:
 
     //
     std::shared_ptr<Miner> m_Miner;
-    int m_Money{};
+    int m_Money{}, m_LastAddedMoney{};
 
 public:
     // Game state control
@@ -69,6 +69,7 @@ public:
 
     // Getter
     [[nodiscard]] int GetMoney() const { return m_Money; }
+    [[nodiscard]] int GetLastAddedMoney() const { return m_LastAddedMoney; }
     [[nodiscard]] State GetState() const { return m_GameState; }
     [[nodiscard]] int GetTimeLeft() const { return m_TimeLeft; }
 

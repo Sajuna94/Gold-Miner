@@ -27,7 +27,7 @@ public:
         m_HitBox.size *= multiplier;
         m_Transform.scale *= multiplier;
         m_Weight *= log(1 + multiplier);
-        m_Money *= static_cast<int>(multiplier);
+        m_Money = multiplier * m_Money;
     }
 
 private:

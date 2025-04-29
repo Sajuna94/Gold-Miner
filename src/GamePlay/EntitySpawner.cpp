@@ -67,10 +67,7 @@ void EntitySpawner::QueueRandomCollectible(const std::shared_ptr<Entity>& entity
 
 std::shared_ptr<Entity> EntitySpawner::GenerateRandomCollectible()
 {
-    int randIndex = RandInRange(0, static_cast<int>(kCollectibleFactories.size()) - 1);
-    if (RandInRange(0, 10) > 2)
-        randIndex = 4;
-    return kCollectibleFactories[randIndex]();
+    return kCollectibleFactories[RandInRange(0, static_cast<int>(kCollectibleFactories.size()) - 1)]();
 }
 
 std::vector<std::shared_ptr<Util::GameObject>> EntitySpawner::ExtractEntities()
