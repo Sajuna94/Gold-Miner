@@ -8,8 +8,8 @@ class Bag final : public Entity, public IGrabbable
 {
 public:
     explicit Bag(const float zIndex)
-        : Entity({{0, 0}, {30, 30}}),
-          IGrabbable(40, RandInRange(100, 200)),
+        : Entity({{0, 0}, {60, 70}}),
+          IGrabbable(20, RandInRange(100, 200)),
           m_Image(std::make_shared<Util::Image>(RESOURCE_DIR"/Collectible/bag.png"))
     {
         SetDrawable(m_Image);

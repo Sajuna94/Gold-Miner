@@ -18,11 +18,11 @@ public:
         SetDrawable(m_Image);
         SetZIndex(zIndex);
 
-        const float multiplier = RandInRange(60, 150) / 100.0f;
+        const float multiplier = static_cast<float>(RandInRange(60, 150)) / 100.0f;
         m_HitBox = {{0, 0}, GetScaledSize() * 0.9f * multiplier};
         m_Transform.scale *= multiplier;
         m_Weight *= log(1 + multiplier);
-        m_Money *= multiplier;
+        m_Money *= static_cast<int>(multiplier);
     }
 
 private:

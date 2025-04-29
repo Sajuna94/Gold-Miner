@@ -4,12 +4,28 @@
 class Timer
 {
 public:
-    explicit Timer(int startSeconds, int intervalMs);
+    /**
+     * @brief Construct a timer.
+     * @param startSeconds Initial time in seconds.
+     * @param interval Interval between events in milliseconds.
+     */
+    explicit Timer(int startSeconds, int interval);
 
+    /**
+     * @brief Advance the timer by a delta time.
+     * @param dt time passed in seconds.
+     */
     void Update(float dt);
 
+    /**
+     * @brief Check if the timer has reached a new interval.
+     * @return True if a new interval was reached, false otherwise.
+     */
     bool Event();
 
+    /**
+     * @return The current second of the timer
+     */
     [[nodiscard]] int GetSecond() const;
 
 private:

@@ -1,7 +1,7 @@
 #ifndef ICOLLIDABLE_H
 #define ICOLLIDABLE_H
-#include <memory>
-#include <glm/vec2.hpp>
+
+#include "Util/GameObject.hpp"
 
 struct HitBox
 {
@@ -9,20 +9,30 @@ struct HitBox
     glm::vec2 size;
 };
 
-class ICollidable
+class ICollidable : virtual public Util::GameObject
 {
+protected:
+    HitBox m_HitBox{};
+
 public:
-    virtual ~ICollidable() = default;
+    ~ICollidable() override = default;
 
-    [[nodiscard]] virtual glm::vec2 GetWorldPosition() const = 0;
-    [[nodiscard]] virtual HitBox GetHitBox() const = 0;
+    /**
+     * @brief Get the object's HitBox.
+     * @return The HitBox (offset and size).
+     */
+    [[nodiscard]] virtual HitBox GetHitBox() { return m_HitBox; }
 
+    /**
+     * @brief Check if this object overlaps with another.
+     * @return True if they overlap, false otherwise.
+     */
     [[nodiscard]] bool IsOverlay(const std::shared_ptr<ICollidable>& other) const
     {
-        const glm::vec2 center1 = GetWorldPosition() + GetHitBox().offset;
-        const glm::vec2 halfSize1 = GetHitBox().size * 0.5f;
+        const glm::vec2 center1 = m_Transform.translation + m_HitBox.offset;
+        const glm::vec2 halfSize1 = m_HitBox.size * 0.5f;
 
-        const glm::vec2 center2 = other->GetWorldPosition() + other->GetHitBox().offset;
+        const glm::vec2 center2 = other->GetTransform().translation + other->GetHitBox().offset;
         const glm::vec2 halfSize2 = other->GetHitBox().size * 0.5f;
 
         return

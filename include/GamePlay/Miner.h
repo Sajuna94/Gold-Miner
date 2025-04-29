@@ -17,20 +17,23 @@ public:
     explicit Miner(float zIndex, float pickaxeZIndex);
 
 private:
+    // Miner State
     State m_State = State::STOPPED;
 
+    // Drawable Object
     std::shared_ptr<Entity> m_Pickaxe;
     std::shared_ptr<UI::Picture> m_Rope;
     std::array<std::shared_ptr<UI::Picture>, 2> m_Wheels;
 
+    // Interact Object
     std::shared_ptr<Entity> m_GrabItem = nullptr;
-    glm::vec2 m_ThrownPosition{};
 
     // Miner variable
     const float m_MoveSpeed = 100.0f;
     const float m_WheelRotateSpeed = 10.0f;
 
     // Pickaxe variable
+    glm::vec2 m_ThrownPosition{};
     glm::vec2 m_DeltaMovePosition{};
     const float m_PickaxeMoveSpeed = 300.0f;
     const float m_PickaxeRotateSpeed = 100.0f;
@@ -40,15 +43,16 @@ private:
 public:
     void Update(float dt);
     void Move(const glm::vec2& delta, float dt) override;
-    bool IsReturnBack() const;
+    [[nodiscard]] bool IsReturnBack() const;
 
+    // Miner State Control
     void StopPickaxe();
     void ThrowPickaxe();
     void ReturnPickaxe();
 
     // Getter
     [[nodiscard]] State GetState() const { return m_State; }
-    [[nodiscard]] std::shared_ptr<Entity> GetPickaxe() const { return  m_Pickaxe; }
+    [[nodiscard]] std::shared_ptr<Entity> GetPickaxe() const { return m_Pickaxe; }
     std::shared_ptr<Entity> GetGrabItem();
 
     // Setter

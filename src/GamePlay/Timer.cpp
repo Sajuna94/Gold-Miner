@@ -1,8 +1,8 @@
 #include "GamePlay/Timer.h"
 
-Timer::Timer(const int startSeconds, const int intervalMs)
+Timer::Timer(const int startSeconds, const int interval)
     : m_InitialSeconds(startSeconds),
-      m_Interval(static_cast<float>(intervalMs) / 1000.0f),
+      m_Interval(static_cast<float>(interval) / 1000.0f),
       m_ElapsedSeconds(static_cast<float>(startSeconds))
 {
 }

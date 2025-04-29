@@ -22,50 +22,41 @@ namespace
     };
 }
 
-bool EntitySpawner::TrySpawnEntities()
+bool EntitySpawner::TrySpawnEntity()
 {
-    std::vector<std::shared_ptr<Entity>> failedSpawnEntities;
-    while (!m_EntitySpawnQueue.empty() && m_SpawnedEntities.size() < 20)
+    if (m_EntitySpawnQueue.empty())
+        return false;
+
+    const auto& entity = m_EntitySpawnQueue.front();
+
+    const int width = static_cast<int>(WINDOW_WIDTH - entity->GetHitBox().size.x) / 2;
+    const int height = static_cast<int>(WINDOW_HEIGHT - entity->GetHitBox().size.y) / 2;
+
+    // Random place entity
+    int tryPlaceCount = 0;
+    while (tryPlaceCount < MAX_SPAWN_ATTEMPTS)
     {
-        const auto& entity = m_EntitySpawnQueue.front();
+        entity->SetPosition({
+            RandInRange(-width, width),
+            RandInRange(-height, height - 200),
+        });
 
-        const int width = static_cast<int>(WINDOW_WIDTH - entity->GetHitBox().size.x) / 2;
-        const int height = static_cast<int>(WINDOW_HEIGHT - entity->GetHitBox().size.y) / 2;
-
-        int tryPlaceCount = 0;
-        while (tryPlaceCount < MAX_SPAWN_ATTEMPTS)
+        if (std::none_of(m_SpawnedEntities.begin(), m_SpawnedEntities.end(),
+                         [&](const auto& other) { return other->IsOverlay(entity); }))
         {
-            entity->SetPosition({
-                RandInRange(-width, width),
-                RandInRange(-height, height - 200),
-            });
-
-            if (std::none_of(m_SpawnedEntities.begin(), m_SpawnedEntities.end(),
-                             [&](const auto& other) { return other->IsOverlay(entity); }))
-            {
-                break;
-            }
-
-            tryPlaceCount += 1;
+            break;
         }
-
-        if (tryPlaceCount < MAX_SPAWN_ATTEMPTS)
-        {
-            m_SpawnedEntities.insert(entity);
-            m_EntitiesBuffer.push_back(entity);
-        }
-        else
-            failedSpawnEntities.push_back(entity);
-
-        m_EntitySpawnQueue.pop();
+        tryPlaceCount += 1;
     }
-    for (auto& entity : failedSpawnEntities)
-        m_EntitySpawnQueue.push(entity);
 
-    // means spawn entity success
-    if (!m_EntitiesBuffer.empty())
+    // If place safe
+    if (tryPlaceCount < MAX_SPAWN_ATTEMPTS)
+    {
+        m_SpawnedEntities.insert(entity);
+        m_EntitiesBuffer.push_back(entity);
+        m_EntitySpawnQueue.pop();
         return true;
-
+    }
     return false;
 }
 
@@ -76,7 +67,10 @@ void EntitySpawner::QueueRandomCollectible(const std::shared_ptr<Entity>& entity
 
 std::shared_ptr<Entity> EntitySpawner::GenerateRandomCollectible()
 {
-    return kCollectibleFactories[RandInRange(0, static_cast<int>(kCollectibleFactories.size()) - 1)]();
+    int randIndex = RandInRange(0, static_cast<int>(kCollectibleFactories.size()) - 1);
+    if (RandInRange(0, 10) > 2)
+        randIndex = 4;
+    return kCollectibleFactories[randIndex]();
 }
 
 std::vector<std::shared_ptr<Util::GameObject>> EntitySpawner::ExtractEntities()

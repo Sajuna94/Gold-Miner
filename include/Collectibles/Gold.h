@@ -20,13 +20,14 @@ public:
               true, 300, true, 300))
     {
         SetDrawable(m_Animation);
+        m_Animation->SetCurrentFrame(RandInRange(0, static_cast<int>(m_Animation->GetFrameCount()) - 1));
         SetZIndex(zIndex);
 
         const float multiplier = GetMultiplier();
         m_HitBox.size *= multiplier;
         m_Transform.scale *= multiplier;
         m_Weight *= log(1 + multiplier);
-        m_Money *= multiplier;
+        m_Money *= static_cast<int>(multiplier);
     }
 
 private:

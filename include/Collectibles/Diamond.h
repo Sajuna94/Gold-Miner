@@ -19,9 +19,10 @@ public:
                   RESOURCE_DIR"/Collectible/Diamond/diamond-5.png",
                   RESOURCE_DIR"/Collectible/Diamond/diamond-6.png",
               },
-              true, 100, true, 100))
+              true, 400, true, 100))
     {
         SetDrawable(m_Animation);
+        m_Animation->SetCurrentFrame(RandInRange(0, static_cast<int>(m_Animation->GetFrameCount()) - 1));
         SetZIndex(zIndex);
     }
 

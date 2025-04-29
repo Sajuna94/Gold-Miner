@@ -3,24 +3,24 @@
 #include <utility>
 
 Miner::Miner(const float zIndex, const float pickaxeZIndex)
-    : Entity(RESOURCE_DIR"/Miner/miner.png", zIndex)
+    : GameObject(std::make_unique<Util::Image>(RESOURCE_DIR"/Miner/miner.png"), zIndex)
 {
     m_Transform.translation = {5.5, 255};
     m_Transform.scale = {0.68F, 0.68F};
 
     m_Pickaxe = std::make_shared<Entity>(RESOURCE_DIR"/Miner/pickaxe.png", pickaxeZIndex);
-    m_Pickaxe->SetPosition(GetPosition() + glm::vec2(-5.5, -26));
+    m_Pickaxe->SetPosition(m_Transform.translation + glm::vec2(-5.5, -26));
     m_Pickaxe->SetPivot({0, 6});
     m_Pickaxe->SetHitBox({{0, 0}, {30, 15}});
 
     m_Rope = std::make_shared<UI::Picture>(RESOURCE_DIR"/Miner/rope.png", zIndex + 2);
-    m_Rope->SetPosition(GetPosition() + m_Pickaxe->GetPosition());
+    m_Rope->SetPosition(m_Transform.translation + m_Pickaxe->GetPosition());
 
     m_Wheels[0] = std::make_shared<UI::Picture>(RESOURCE_DIR"/Miner/wheel.png", zIndex + 1);
-    m_Wheels[0]->SetPosition(GetPosition() + glm::vec2(-43, -77));
+    m_Wheels[0]->SetPosition(m_Transform.translation + glm::vec2(-43, -77));
     m_Wheels[0]->SetScaleSize({0.8f, 0.8f});
     m_Wheels[1] = std::make_shared<UI::Picture>(RESOURCE_DIR"/Miner/wheel.png", zIndex + 1);
-    m_Wheels[1]->SetPosition(GetPosition() + glm::vec2(41, -77));
+    m_Wheels[1]->SetPosition(m_Transform.translation + glm::vec2(41, -77));
     m_Wheels[1]->SetScaleSize({0.8f, 0.8f});
 
     m_ThrownPosition = m_Pickaxe->GetPosition();
@@ -47,7 +47,7 @@ void Miner::Update(const float dt)
             m_PickaxeRotateDirection = -m_PickaxeRotateDirection;
         }
 
-        m_Pickaxe->SetRotation(glm::radians(m_PickaxeRotateAngle));
+        m_Pickaxe->m_Transform.rotation = glm::radians(m_PickaxeRotateAngle);
     }
     else
     {
@@ -100,7 +100,7 @@ void Miner::SetGrabItem(const std::shared_ptr<IGrabbable>& grabItem)
 {
     m_GrabItem = std::dynamic_pointer_cast<Entity>(grabItem);
     m_GrabItem->SetZIndex(m_Pickaxe->GetZIndex() - 1);
-    m_GrabItem->SetRotation(m_Pickaxe->GetTransform().rotation);
+    m_GrabItem->m_Transform.rotation = m_Pickaxe->GetTransform().rotation;
     m_GrabItem->SetPosition(m_Pickaxe->GetPosition() + glm::vec2(
         sin(m_Pickaxe->GetTransform().rotation),
         -cos(m_Pickaxe->GetTransform().rotation)

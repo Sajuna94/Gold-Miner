@@ -16,18 +16,17 @@
     return dis(gen);
 }
 
-class Entity : public Util::GameObject, public ICollidable, public IMoveable
+class Entity : virtual public Util::GameObject, public ICollidable, public IMoveable
 {
-protected:
-    HitBox m_HitBox{};
-
 public:
     ~Entity() override = default;
 
     explicit Entity() = default;
 
-    explicit Entity(const HitBox& hitBox) : m_HitBox(hitBox)
+    explicit Entity(const HitBox& hitBox)
     {
+        m_HitBox = hitBox;
+        m_Transform.translation = {0, 0};
     }
 
     explicit Entity(const std::string& imagePath, const float zIndex): GameObject(
@@ -37,14 +36,8 @@ public:
 
     void SetHitBox(const HitBox& hitBox) { m_HitBox = hitBox; }
 
-    // Interface IMoveable
-    [[nodiscard]] glm::vec2 GetPosition() const final { return m_Transform.translation; }
-    void SetPosition(const glm::vec2& position) final { m_Transform.translation = position; }
-    void SetRotation(const float rotation) override { m_Transform.rotation = rotation; }
-
-    // Interface ICollidable
-    [[nodiscard]] glm::vec2 GetWorldPosition() const final { return m_Transform.translation; }
-    [[nodiscard]] HitBox GetHitBox() const final { return m_HitBox; }
+private:
+    std::shared_ptr<Util::Image> m_Image;
 };
 
 

@@ -47,7 +47,7 @@ public:
 
     [[nodiscard]] bool InTheBlowRange(const std::shared_ptr<ICollidable>& collidable) const
     {
-        return m_Radius >= length(GetWorldPosition() - collidable->GetWorldPosition());
+        return m_Radius >= length(GetPosition() - collidable->m_Transform.translation);
     }
 
 private:

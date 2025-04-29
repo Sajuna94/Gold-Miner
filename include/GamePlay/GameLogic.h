@@ -36,18 +36,19 @@ public:
     };
 
 private:
+    // Current game state.
     State m_GameState = State::PAUSED;
 
-    // Game Adapter
-    std::vector<CommandType> m_CommandBuffer;
-    std::vector<std::shared_ptr<Util::GameObject>> m_AddableBuffer;
-    std::vector<std::shared_ptr<Util::GameObject>> m_RemovableBuffer;
+    // Command and entity buffers. PS: Game Adapter
+    std::vector<CommandType> m_CommandBuffer; // Store commands to execute.
+    std::vector<std::shared_ptr<Util::GameObject>> m_AddableBuffer; // Store addable objectives.
+    std::vector<std::shared_ptr<Util::GameObject>> m_RemovableBuffer; // Store removable objectives.
 
-    // Entity Control
-    std::shared_ptr<EntitySpawner> m_EntitySpawner;
-    std::unordered_set<std::shared_ptr<Entity>> m_HandleEntityList;
+    // Entity control.
+    std::shared_ptr<EntitySpawner> m_EntitySpawner; // Entity spawner for handling entities.
+    std::unordered_set<std::shared_ptr<Entity>> m_HandleEntityList; // List of entities to update.
 
-    // Timer
+    // Timer and time management.
     std::shared_ptr<Timer> m_Timer;
     int m_TimeLeft{}, m_TimeSpawn{};
 
@@ -56,12 +57,12 @@ private:
     int m_Money{};
 
 public:
-    // Game State Control
+    // Game state control
     void GameStart();
     void Update(float dt, const InputState& input);
     void GameOver();
 
-    // Extract Buffer
+    // Extract buffers
     std::vector<CommandType> ExtractCommands();
     std::vector<std::shared_ptr<Util::GameObject>> ExtractAddedChildren();
     std::vector<std::shared_ptr<Util::GameObject>> ExtractRemovedChildren();
@@ -72,17 +73,29 @@ public:
     [[nodiscard]] int GetTimeLeft() const { return m_TimeLeft; }
 
 private:
-    // Handle Game State
+    /**
+     * @brief Handle game progression, such as win/loss conditions.
+     */
     void HandleGameCycle(float dt);
 
-    // Spawn Logic
+    /**
+      * @brief Try to spawn new entities if the timing is right.
+      */
     void HandleEntitySpawn();
 
-    // Entity Update Unit
+    /**
+     * @brief Update all entities in the game.
+     */
     void HandleEntityCycle();
+
+    /**
+     * @brief Trigger bomb chain explosion effects.
+     */
     void HandleBombExplosion(const std::shared_ptr<Bomb>& bomb);
 
-    // Miner Update Logic
+    /**
+     * @brief Update miner's behavior based on input.
+     */
     void HandleMinerState(float dt, const InputState& input);
 };
 

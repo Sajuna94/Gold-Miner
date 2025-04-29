@@ -1,8 +1,6 @@
 #ifndef IGRABBABLE_H
 #define IGRABBABLE_H
 
-#include <random>
-
 class IGrabbable
 {
 protected:
@@ -19,14 +17,6 @@ public:
 
     virtual float GetWeight() { return m_Weight; }
     virtual int GetMoney() { return m_Money; }
-
-    static int RandInRange(const int left, const int right)
-    {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        std::uniform_int_distribution dis(left, right);
-        return dis(gen);
-    }
 };
 
 #endif //IGRABBABLE_H

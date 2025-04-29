@@ -10,8 +10,7 @@
 constexpr int HALF_WINDOW_WIDTH = WINDOW_WIDTH / 2;
 constexpr int HALF_WINDOW_HEIGHT = WINDOW_HEIGHT / 2;
 
-#define MAX_COLLECTIBLE_COUNT 25
-#define MAX_SPAWN_ATTEMPTS  20
+#define MAX_COLLECTIBLE_COUNT 50
 
 #define PLAY_TIME_LIMIT 60
 #define SPAWN_INTERVAL 5
@@ -43,13 +42,14 @@ void GameLogic::Update(const float dt, const InputState& input)
 {
     switch (m_GameState)
     {
-    case State::PAUSED:
-        break;
     case State::RUNNING:
+        // Order doesn't matter in this cycle
         HandleGameCycle(dt); // Game Trigger
         HandleEntitySpawn(); // Place Entities
         HandleEntityCycle(); // Bomb Chain Explosion
         HandleMinerState(dt, input); // Handle Miner & Pickaxe Logic
+        break;
+    case State::PAUSED:
         break;
     case State::GAME_OVER:
         break;
@@ -88,11 +88,15 @@ void GameLogic::HandleGameCycle(const float dt)
 
 void GameLogic::HandleEntitySpawn()
 {
-    if (m_EntitySpawner->TrySpawnEntities())
+    if (m_Miner->GetState() != Miner::State::STOPPED)
+        return;
+    while (m_EntitySpawner->GetSpawnedEntities().size() < MAX_COLLECTIBLE_COUNT)
     {
-        for (const auto& entity : m_EntitySpawner->ExtractEntities())
-            m_AddableBuffer.push_back(entity);
+        if (!m_EntitySpawner->TrySpawnEntity())
+            break;
     }
+    for (const auto& entity : m_EntitySpawner->ExtractEntities())
+        m_AddableBuffer.push_back(entity);
 }
 
 void GameLogic::HandleMinerState(const float dt, const InputState& input)
@@ -171,12 +175,14 @@ void GameLogic::HandleBombExplosion(const std::shared_ptr<Bomb>& bomb)
     m_HandleEntityList.erase(bomb);
     m_RemovableBuffer.push_back(bomb);
 
-    std::list<std::shared_ptr<Entity>> removableEntities;
+    std::vector<std::shared_ptr<Entity>> removableEntities;
     for (const auto& entity : spawnedEntities)
         if (bomb->InTheBlowRange(entity))
         {
             if (const auto& otherBomb = std::dynamic_pointer_cast<Bomb>(entity))
             {
+                if (otherBomb->IsBlownUp())
+                    continue;
                 otherBomb->Explosion();
                 m_HandleEntityList.insert(otherBomb);
             }

@@ -6,10 +6,10 @@
 
 namespace UI
 {
-    class Picture final : public Util::GameObject, public IMoveable
+    class Picture final : virtual public Util::GameObject, public IMoveable
     {
     public:
-        explicit Picture(const std::string& imagePath, const int zIndex) : GameObject(
+        explicit Picture(const std::string& imagePath, const float zIndex) : GameObject(
             std::make_unique<Util::Image>(imagePath), zIndex)
         {
         }
@@ -17,9 +17,7 @@ namespace UI
         void SetScaleSize(const glm::vec2 scale) { m_Transform.scale = scale; }
 
         // Interface IMoveable
-        [[nodiscard]] glm::vec2 GetPosition() const override { return m_Transform.translation; }
-        void SetPosition(const glm::vec2& position) override { m_Transform.translation = position; }
-        void SetRotation(const float rotation) override { m_Transform.rotation = rotation; }
+        void SetRotation(const float rotation) { m_Transform.rotation = rotation; }
 
         void SetImage(const std::string& imagePath) const
         {
