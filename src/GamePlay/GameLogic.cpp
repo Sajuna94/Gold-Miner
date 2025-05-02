@@ -3,14 +3,18 @@
 #include <locale>
 
 #include "config.hpp"
+#include "Core/GameConfig.h"
 #include "Collectibles/Bag.h"
 #include "Collectibles/Bomb.h"
+#include "Collectibles/Rock.h"
+#include "Core/Product.h"
+#include "Util/Input.hpp"
 #include "Util/Time.hpp"
 
 constexpr int HALF_WINDOW_WIDTH = WINDOW_WIDTH / 2;
 constexpr int HALF_WINDOW_HEIGHT = WINDOW_HEIGHT / 2;
 
-#define MAX_COLLECTIBLE_COUNT 50
+#define MAX_COLLECTIBLE_COUNT 30
 
 #define PLAY_TIME_LIMIT 60
 #define SPAWN_INTERVAL 5
@@ -30,12 +34,14 @@ void GameLogic::GameStart()
 
     // Push Random Collectible of Queue
     const auto time = Util::Time::GetElapsedTimeMs();
-    for (int i = 0; i < MAX_COLLECTIBLE_COUNT; i++)
+    for (int i = 0; i < MAX_COLLECTIBLE_COUNT + 20; i++)
         m_EntitySpawner->QueueRandomCollectible();
     printf("Creating & Loading %d collectible done. %f ms\n", MAX_COLLECTIBLE_COUNT,
            Util::Time::GetElapsedTimeMs() - time);
 
     m_GameState = State::RUNNING;
+
+    m_Inventory[Item::Props::TNT] = 99;
 }
 
 void GameLogic::Update(const float dt, const InputState& input)
@@ -46,8 +52,10 @@ void GameLogic::Update(const float dt, const InputState& input)
         // Order doesn't matter in this cycle
         HandleGameCycle(dt); // Game Trigger
         HandleEntitySpawn(); // Place Entities
-        HandleEntityCycle(); // Bomb Chain Explosion
+        HandleEntityCycle(dt); // Bomb Chain Explosion
         HandleMinerState(dt, input); // Handle Miner & Pickaxe Logic
+        HandleInventory();
+        m_EntitySpawner->Update();
         break;
     case State::PAUSED:
         break;
@@ -83,6 +91,36 @@ void GameLogic::HandleGameCycle(const float dt)
             m_EntitySpawner->QueueRandomCollectible();
             m_TimeSpawn = 0;
         }
+    }
+}
+
+void GameLogic::HandleInventory()
+{
+    if (Util::Input::IsKeyDown(Util::Keycode::Q) &&
+        m_Inventory[Item::Props::TNT] > 0)
+    {
+        m_Inventory[Item::Props::TNT] -= 1;
+
+        const auto tnt = std::make_shared<Entity>(GetPath(Item::Props::TNT), 50);
+        tnt->SetHitBox({{0, 0}, {10, 10}});
+        tnt->SetName("tnt");
+        tnt->SetPosition(m_Miner->GetPosition());
+        tnt->m_Transform.scale = {0.3f, 0.3f};
+
+        m_AddableBuffer.push_back(tnt);
+        m_HandleEntityList.insert(tnt);
+    }
+}
+
+void GameLogic::HandleEntityCycle(const float dt)
+{
+    const auto temp = m_HandleEntityList;
+    for (const auto& entity : temp)
+    {
+        if (const auto& bomb = std::dynamic_pointer_cast<Bomb>(entity))
+            HandleBombExplosion(bomb);
+        else if (entity->GetName() == "tnt")
+            HandleTntExplosion(entity, dt);
     }
 }
 
@@ -123,12 +161,16 @@ void GameLogic::HandleMinerState(const float dt, const InputState& input)
             if (pickaxe->IsOverlay(entity))
             {
                 if (const auto& grabbable = std::dynamic_pointer_cast<IGrabbable>(entity))
-                    m_Miner->SetGrabItem(grabbable);
-                else if (const auto& bomb = std::dynamic_pointer_cast<Bomb>(entity))
                 {
-                    bomb->Explosion();
-                    m_HandleEntityList.insert(bomb);
+                    m_Miner->SetGrabItem(grabbable);
+
+                    if (m_Inventory[Item::Props::STONE_LIGHT] == 0)
+                        continue;
+                    if (const auto& rock = std::dynamic_pointer_cast<Rock>(entity))
+                        rock->SetWeight(rock->GetWeight() * 0.5f);
                 }
+                else if (const auto& bomb = std::dynamic_pointer_cast<Bomb>(entity))
+                    ExplosionBomb(bomb);
                 m_Miner->ReturnPickaxe();
                 break;
             }
@@ -153,48 +195,62 @@ void GameLogic::HandleMinerState(const float dt, const InputState& input)
     }
 }
 
-void GameLogic::HandleEntityCycle()
-{
-    const auto temp = m_HandleEntityList;
-    for (const auto& entity : temp)
-    {
-        if (const auto& bomb = std::dynamic_pointer_cast<Bomb>(entity))
-            HandleBombExplosion(bomb);
-    }
-}
-
 void GameLogic::HandleBombExplosion(const std::shared_ptr<Bomb>& bomb)
 {
     if (!bomb->IsBlownUp())
         return;
 
-    printf("[GameLogic] Bomb handle over\n");
+    const auto& spawnedEntities = m_EntitySpawner->GetSpawnedEntities();
 
-    auto& spawnedEntities = m_EntitySpawner->GetSpawnedEntities();
-
-    spawnedEntities.erase(bomb);
     m_HandleEntityList.erase(bomb);
     m_RemovableBuffer.push_back(bomb);
 
-    std::vector<std::shared_ptr<Entity>> removableEntities;
     for (const auto& entity : spawnedEntities)
         if (bomb->InTheBlowRange(entity))
         {
             if (const auto& otherBomb = std::dynamic_pointer_cast<Bomb>(entity))
-            {
-                if (otherBomb->IsBlownUp())
-                    continue;
-                otherBomb->Explosion();
-                m_HandleEntityList.insert(otherBomb);
-            }
+                ExplosionBomb(otherBomb);
             else
             {
-                removableEntities.push_back(entity);
+                m_EntitySpawner->PushRemovableEntities(entity);
                 m_RemovableBuffer.push_back(entity);
             }
         }
-    for (const auto& removable : removableEntities)
-        spawnedEntities.erase(removable);
+}
+
+void GameLogic::HandleTntExplosion(const std::shared_ptr<Entity>& tnt, const float dt)
+{
+    tnt->Move({0, -100.0f}, dt);
+    tnt->m_Transform.rotation -= 10.0f * dt;
+
+    for (const auto& placed : m_EntitySpawner->GetSpawnedEntities())
+        if (tnt->IsOverlay(placed))
+        {
+            if (const auto& otherBomb = std::dynamic_pointer_cast<Bomb>(placed))
+                ExplosionBomb(otherBomb);
+            else
+            {
+                m_EntitySpawner->PushRemovableEntities(placed);
+                m_RemovableBuffer.push_back(placed);
+            }
+            m_HandleEntityList.erase(tnt);
+            m_RemovableBuffer.push_back(tnt);
+
+            const auto explosion = std::make_shared<Bomb>(50);
+            explosion->SetPosition(tnt->GetPosition());
+            m_AddableBuffer.push_back(explosion);
+            ExplosionBomb(explosion, 1.5f);
+            break;
+        }
+}
+
+void GameLogic::ExplosionBomb(const std::shared_ptr<Bomb>& bomb, const float scale)
+{
+    if (bomb->IsBlownUp())
+        return;
+    bomb->Explosion(scale);
+    m_EntitySpawner->PushRemovableEntities(bomb);
+    m_HandleEntityList.insert(bomb);
 }
 
 std::vector<GameLogic::CommandType> GameLogic::ExtractCommands()
@@ -210,4 +266,10 @@ std::vector<std::shared_ptr<Util::GameObject>> GameLogic::ExtractAddedChildren()
 std::vector<std::shared_ptr<Util::GameObject>> GameLogic::ExtractRemovedChildren()
 {
     return std::exchange(m_RemovableBuffer, {});
+}
+
+void GameLogic::SetInventory(const std::vector<Item::Props>& propsArray)
+{
+    for (Item::Props props : propsArray)
+        m_Inventory[props] += 1;
 }

@@ -7,6 +7,7 @@
 #include "Util/Keycode.hpp"
 #include "Menus/StartMenu.h"
 #include "Menus/GameMenu.h"
+#include "Menus/ShopMenu.h"
 
 void App::Start()
 {
@@ -49,9 +50,11 @@ void App::ChangeMenu(const Menu::Screen screen)
         m_Menu = std::make_shared<StartMenu>();
         break;
     case Menu::Screen::GAME_MENU:
-        m_Menu = std::make_shared<GameMenu>();
+        m_Menu = std::make_shared<GameMenu>(m_CurrentLevel);
         break;
     case Menu::Screen::STORE_MENU:
+        m_Menu = std::make_shared<ShopMenu>(m_CurrentLevel);
+        m_CurrentLevel += 1;
         break;
     }
     m_Root.AddChild(m_Menu);

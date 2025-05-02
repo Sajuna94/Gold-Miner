@@ -7,13 +7,12 @@ class Rock final : public Entity, public IGrabbable
 {
 public:
     explicit Rock(const float zIndex)
-        : IGrabbable(50, 10),
+        : IGrabbable(70, 10),
           m_Image(std::make_shared<Util::Image>(
               std::vector<std::string>{
                   RESOURCE_DIR"/Collectible/Rock/rock-1.png",
                   RESOURCE_DIR"/Collectible/Rock/rock-2.png",
               }[RandInRange(0, 1)]))
-
     {
         SetDrawable(m_Image);
         SetZIndex(zIndex);
@@ -22,7 +21,7 @@ public:
         m_HitBox = {{0, 0}, GetScaledSize() * 0.9f * multiplier};
         m_Transform.scale *= multiplier;
         m_Weight *= log(1 + multiplier);
-        m_Money = multiplier * m_Money;
+        m_Money = static_cast<int>(multiplier * static_cast<float>(m_Money));
     }
 
 private:

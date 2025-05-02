@@ -8,6 +8,7 @@
 #include "Core/Entity.h"
 #include "Timer.h"
 #include "Collectibles/Bomb.h"
+#include "Core/GameConfig.h"
 
 struct InputState
 {
@@ -56,11 +57,15 @@ private:
     std::shared_ptr<Miner> m_Miner;
     int m_Money{}, m_LastAddedMoney{};
 
+    std::unordered_map<Item::Props, int> m_Inventory;
+
 public:
     // Game state control
     void GameStart();
     void Update(float dt, const InputState& input);
     void GameOver();
+
+    void SetInventory(const std::vector<Item::Props>& propsArray);
 
     // Extract buffers
     std::vector<CommandType> ExtractCommands();
@@ -87,17 +92,23 @@ private:
     /**
      * @brief Update all entities in the game.
      */
-    void HandleEntityCycle();
+    void HandleEntityCycle(float dt);
 
     /**
      * @brief Trigger bomb chain explosion effects.
      */
     void HandleBombExplosion(const std::shared_ptr<Bomb>& bomb);
+    void HandleTntExplosion(const std::shared_ptr<Entity>& tnt, float dt);
 
     /**
      * @brief Update miner's behavior based on input.
      */
     void HandleMinerState(float dt, const InputState& input);
+
+    void HandleInventory();
+
+
+    void ExplosionBomb(const std::shared_ptr<Bomb>& bomb, float scale = 2.5f);
 };
 
 

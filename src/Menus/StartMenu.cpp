@@ -24,6 +24,10 @@ void StartMenu::Update(App* app)
         printf("[~] Click StartButton\n");
         app->ChangeMenu(Screen::GAME_MENU);
     }
+
+    // list { A }
+    m_Root A.push(make share( obja))\
+    remove(list[0])
 }
 
 void StartMenu::Close()

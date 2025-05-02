@@ -17,6 +17,7 @@ namespace DefaultPosition
     constexpr glm::vec2 CountDownText = {505, HALF_WINDOW_HEIGHT - 106.5};
 }
 
+
 void GameMenu::Open()
 {
     SetDrawable(std::make_shared<Util::Image>(RESOURCE_DIR"/Background/game_background.png"));
@@ -25,15 +26,9 @@ void GameMenu::Open()
 
     m_GameLogic = std::make_shared<GameLogic>();
 
-    m_FPSText = std::make_shared<UI::Text>("TIME", 20);
+    m_FPSText = std::make_shared<UI::Text>("FPS_TEXT", 20);
     m_FPSText->SetPosition({HALF_WINDOW_WIDTH - m_FPSText->GetScaledSize().x, HALF_WINDOW_HEIGHT - 20});
     AddChild(m_FPSText);
-
-    // m_AddedMoneyText = std::make_shared<UI::Text>("000", 90);
-    // m_AddedMoneyText->SetPosition(DefaultPosition::AddedMoneyText);
-    // m_AddedMoneyText->SetColor(Util::Color::FromRGB(69, 95, 47));
-    // m_AddedMoneyText->SetVisible(false);
-    // AddChild(m_AddedMoneyText);
 
     m_MoneyText = std::make_shared<UI::Text>("0", 34);
     m_MoneyText->SetPosition(DefaultPosition::MoneyText);
@@ -45,7 +40,7 @@ void GameMenu::Open()
     m_TargetText->SetColor(Util::Color::FromRGB(110, 72, 34));
     AddChild(m_TargetText);
 
-    m_LevelText = std::make_shared<UI::Text>("0", 34);
+    m_LevelText = std::make_shared<UI::Text>(std::to_string(m_Level), 34);
     m_LevelText->SetPosition(DefaultPosition::LevelText);
     m_LevelText->SetColor(Util::Color::FromRGB(110, 72, 34));
     AddChild(m_LevelText);
@@ -70,11 +65,6 @@ void GameMenu::Update(App* app)
     input.MoveRightMiner = Util::Input::IsKeyPressed(Util::Keycode::D);
     input.ThrowPickaxe = Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB);
     input.ReturnPickaxe = Util::Input::IsKeyPressed(Util::Keycode::MOUSE_RB);
-
-    // if (Util::Input::IsKeyPressed(Util::Keycode::LEFT))
-    //     for (const auto& child : GetChildren())
-    //         if (const auto& entity = std::dynamic_pointer_cast<Entity>(child))
-    //             entity->Move({-1, 0});
 
     AnimeAddedMoney(dt);
 

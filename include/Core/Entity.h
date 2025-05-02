@@ -18,6 +18,9 @@
 
 class Entity : virtual public Util::GameObject, public ICollidable, public IMoveable
 {
+private:
+    std::string m_Name;
+
 public:
     ~Entity() override = default;
 
@@ -35,6 +38,9 @@ public:
     }
 
     void SetHitBox(const HitBox& hitBox) { m_HitBox = hitBox; }
+
+    void SetName(const std::string& name) { m_Name = name; }
+    std::string& GetName() { return m_Name; }
 
 private:
     std::shared_ptr<Util::Image> m_Image;

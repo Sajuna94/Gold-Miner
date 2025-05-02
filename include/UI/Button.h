@@ -10,15 +10,13 @@ namespace UI
     class Button final : public Util::GameObject, public IClickable
     {
     public:
-        explicit Button(const std::string& imagePath, const int zIndex)
+        explicit Button(const std::string& imagePath, const float zIndex)
             : GameObject(std::make_unique<Util::Image>(imagePath), zIndex)
         {
         }
 
         void SetPosition(const glm::vec2& Position) { m_Transform.translation = Position; }
         [[nodiscard]] const glm::vec2& GetPosition() const { return m_Transform.translation; }
-
-        [[nodiscard]] bool IsClicked() override;
 
         [[nodiscard]] bool OnHover() const override;
 
@@ -27,9 +25,6 @@ namespace UI
             auto const temp = std::dynamic_pointer_cast<Util::Image>(m_Drawable);
             temp->SetImage(imagePath);
         }
-
-    private:
-        bool waitingMouseUp = false;
     };
 }
 

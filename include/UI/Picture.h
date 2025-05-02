@@ -16,7 +16,6 @@ namespace UI
 
         void SetScaleSize(const glm::vec2 scale) { m_Transform.scale = scale; }
 
-        // Interface IMoveable
         void SetRotation(const float rotation) { m_Transform.rotation = rotation; }
 
         void SetImage(const std::string& imagePath) const

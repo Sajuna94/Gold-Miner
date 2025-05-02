@@ -46,7 +46,7 @@ namespace UI
             }
         }
 
-        std::string GetText() const { return m_Text; }
+        [[nodiscard]] std::string GetText() const { return m_Text; }
 
         void SetType(const Type type)
         {

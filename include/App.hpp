@@ -33,6 +33,7 @@ private:
     State m_CurrentState = State::START;
 
     std::shared_ptr<Menu> m_Menu;
+    int m_CurrentLevel = 1;
 };
 
 #endif

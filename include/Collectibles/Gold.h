@@ -27,7 +27,7 @@ public:
         m_HitBox.size *= multiplier;
         m_Transform.scale *= multiplier;
         m_Weight *= log(1 + multiplier);
-        m_Money = multiplier * m_Money;
+        m_Money = static_cast<int>(multiplier * static_cast<float>(m_Money));
     }
 
 private:
@@ -37,10 +37,10 @@ private:
     {
         const int randomValue = RandInRange(1, 100);
         if (randomValue <= 60)
-            return RandInRange(20, 50) / 100.0f;
+            return static_cast<float>(RandInRange(20, 50)) / 100.0f;
         if (randomValue <= 90)
-            return RandInRange(70, 100) / 100.0f;
-        return RandInRange(120, 150) / 100.0f;
+            return static_cast<float>(RandInRange(70, 100)) / 100.0f;
+        return static_cast<float>(RandInRange(120, 150)) / 100.0f;
     }
 };
 

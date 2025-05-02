@@ -30,13 +30,13 @@ public:
     }
 
     // 我が名はめぐみん。紅魔族随一の魔法の使い手にして、爆裂魔法を操りし者。我が力、見るがいい！エクスプロージョン！
-    void Explosion()
+    void Explosion(const float scale = 2.5f)
     {
         m_ExplosionSound->Play();
         m_Animation->Play();
         m_Animation->SetCurrentFrame(1);
         m_ZIndex = 100;
-        m_Transform.scale = {2.5, 2.5};
+        m_Transform.scale = {scale, scale};
         m_Radius = 52.5f * m_Transform.scale.x;
     }
 

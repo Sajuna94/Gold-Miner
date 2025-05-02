@@ -12,6 +12,8 @@ class EntitySpawner
     std::queue<std::shared_ptr<Entity>> m_EntitySpawnQueue;
     // Set of already spawned entities.
     std::unordered_set<std::shared_ptr<Entity>> m_SpawnedEntities;
+    std::vector<std::shared_ptr<Entity>> m_RemovableEntities;
+
     // Buffer for newly added entities.
     std::vector<std::shared_ptr<Util::GameObject>> m_EntitiesBuffer;
 
@@ -41,6 +43,9 @@ public:
      * @brief Get the set of spawned entities.
      */
     std::unordered_set<std::shared_ptr<Entity>>& GetSpawnedEntities() { return m_SpawnedEntities; }
+
+    void Update() { for (const auto& removable : m_RemovableEntities) m_SpawnedEntities.erase(removable); }
+    void PushRemovableEntities(const std::shared_ptr<Entity>& entity) { m_RemovableEntities.push_back(entity); }
 };
 
 

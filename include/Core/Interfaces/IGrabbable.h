@@ -17,6 +17,8 @@ public:
 
     virtual float GetWeight() { return m_Weight; }
     virtual int GetMoney() { return m_Money; }
+
+    void SetWeight(const float weight) { m_Weight = weight; }
 };
 
 #endif //IGRABBABLE_H
