@@ -6,7 +6,7 @@
 namespace UI {
     class Picture final : public Util::GameObject {
     public:
-        explicit Picture(const std::string &imagePath, glm::vec2 position = {});
+        explicit Picture(const std::string &path, glm::vec2 position = {});
 
         void FullScreen();
 

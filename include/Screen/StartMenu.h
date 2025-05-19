@@ -15,6 +15,7 @@ namespace Screen {
         void ShutDown(Util::Renderer &m_Root) override;
 
     private:
+        std::shared_ptr<Util::GameObject> m_UI;
         std::shared_ptr<UI::Button> m_StartButton;
     };
 } // Screen

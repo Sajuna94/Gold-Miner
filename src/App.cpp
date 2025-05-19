@@ -6,13 +6,18 @@
 #include "Util/Logger.hpp"
 #include <iostream>
 
+#include "Core/ScreenManager.h"
 #include "Screen/GameScene.h"
+#include "Screen/StartMenu.h"
 
 void App::Start() {
     LOG_TRACE("Start");
     m_CurrentState = State::UPDATE;
-    m_CurrentScreen = std::make_shared<Screen::GameScene>();
-    m_CurrentScreen->Init(m_Root);
+
+    glDisable(GL_DEBUG_OUTPUT);
+
+    ScreenManager::Init(m_Root);
+    ScreenManager::NextScreen(std::make_unique<Screen::StartMenu>());
 }
 
 void App::Update() {
@@ -26,7 +31,8 @@ void App::Update() {
         m_CurrentState = State::END;
     }
     m_Root.Update();
-    m_CurrentScreen->Update();
+
+    ScreenManager::UpdateScreen();
 }
 
 void App::End() {
@@ -35,6 +41,6 @@ void App::End() {
 }
 
 void App::ValidTask() {
-    // LOG_TRACE("ValidTask");
+    LOG_TRACE("ValidTask");
 }
 

@@ -8,17 +8,10 @@ public:
 
     virtual void Update() = 0;
 
-    virtual void Init(Util::Renderer& m_Root) = 0;
+    virtual void Init(Util::Renderer &m_Root) = 0;
 
-    virtual void ShutDown(Util::Renderer& m_Root) = 0;
-
-    void SetNextScreen(std::unique_ptr<IScreen>& nextScreen) {
-        m_NextScreen = std::move(nextScreen);
-    };
-private:
-    std::unique_ptr<IScreen> m_NextScreen;
+    virtual void ShutDown(Util::Renderer &m_Root) = 0;
 };
-
 
 
 #endif //I_SCREEN_H

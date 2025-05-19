@@ -3,8 +3,8 @@
 #include "config.hpp"
 
 namespace UI {
-    Picture::Picture(const std::string &imagePath, const glm::vec2 position)
-        : m_Image(std::make_shared<Util::Image>(imagePath)) {
+    Picture::Picture(const std::string &path, const glm::vec2 position)
+        : m_Image(std::make_shared<Util::Image>(path)) {
         SetDrawable(m_Image);
         m_Transform.translation = position;
     }

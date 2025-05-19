@@ -4,7 +4,6 @@ Collection::Collection(const std::shared_ptr<Core::Drawable> &drawable,
                        std::string name, const int money, const float weight)
     : Entity(std::move(name)), m_Money(money), m_Weight(weight) {
     SetDrawable(drawable);
-    printf("collection %s created.\n", GetName().c_str());
 }
 
 void Collection::SetMoney(const int money) {

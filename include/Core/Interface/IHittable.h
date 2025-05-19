@@ -2,7 +2,7 @@
 #define I_HITTABLE_H
 #include <memory>
 
-#include "./Core/Math/Shape.h"
+#include "Core/Math/Shape.h"
 
 class IHittable {
 public:

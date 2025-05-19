@@ -22,8 +22,8 @@ public:
 
     [[nodiscard]] bool IsMinerStopped(float epsilon = 1e-6f) const;
 
+    using Entity::Move;
     void Move(int dir, float dt);
-
 
 
     void StopHook() const { m_Hook->Stop(); }

@@ -1,5 +1,6 @@
 #include "Game/Factory.h"
 #include "Core/Math/Random.h"
+#include "Util/Animation.hpp"
 
 namespace Game {
     std::shared_ptr<Collection> Factory::CreateDiamond() {

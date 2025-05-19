@@ -2,7 +2,6 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
-#include "Core/Interface/IScreen.h"
 
 #include "Util/Renderer.hpp"
 
@@ -21,13 +20,12 @@ public:
     void End(); // NOLINT(readability-convert-member-functions-to-static)
 
     [[nodiscard]] State GetCurrentState() const { return m_CurrentState; }
+
 private:
     void ValidTask();
 
     Util::Renderer m_Root;
     State m_CurrentState = State::START;
-
-    std::shared_ptr<IScreen> m_CurrentScreen;
 };
 
 #endif
