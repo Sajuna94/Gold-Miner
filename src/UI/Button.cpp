@@ -1,35 +1,23 @@
 #include "UI/Button.h"
 
 #include "Util/Input.hpp"
-#include "Util/Keycode.hpp"
 
-void UI::Button::Click()
-{
-}
-
-bool UI::Button::IsClicked()
-{
-    if (!waitingMouseUp && Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover())
-    {
-        this->waitingMouseUp = true;
+namespace UI {
+    Button::Button(const std::string &imagePath)
+        : m_Image(std::make_shared<Util::Image>(imagePath)),
+          m_Bounds(rect({}, m_Image->GetSize())) {
+        SetDrawable(m_Image);
     }
-    if (waitingMouseUp && Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB) && OnHover())
-    {
-        this->waitingMouseUp = false;
-        return OnHover();
+
+    bool Button::OnHover() const {
+        return m_Bounds.contains(Util::Input::GetCursorPosition());
     }
-    return false;
-}
 
-bool UI::Button::OnHover() const
-{
-    glm::vec2 const cursorPos = Util::Input::GetCursorPosition();
-    glm::vec2 const buttonPos = this->GetPosition();
-    glm::vec2 const buttonSize = this->GetScaledSize();
+    bool Button::OnClick() const {
+        return Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB) && OnHover();
+    }
 
-    return !(
-        cursorPos.x < buttonPos.x - buttonSize.x / 2 ||
-        cursorPos.x > buttonPos.x + buttonSize.x / 2 ||
-        cursorPos.y < buttonPos.y - buttonSize.y / 2 ||
-        cursorPos.y > buttonPos.y + buttonSize.y / 2);
-}
+    void Button::SetImage(const std::string &imagePath) const {
+        m_Image->SetImage(imagePath);
+    }
+} // UI

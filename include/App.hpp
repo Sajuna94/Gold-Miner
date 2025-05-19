@@ -2,10 +2,9 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
+#include "Core/Interface/IScreen.h"
 
 #include "Util/Renderer.hpp"
-#include "BackgroundImage.h"
-#include "Menu.h"
 
 class App {
 public:
@@ -21,19 +20,14 @@ public:
 
     void End(); // NOLINT(readability-convert-member-functions-to-static)
 
-    void ChangeMenu(Menu::Screen screen);
-
     [[nodiscard]] State GetCurrentState() const { return m_CurrentState; }
-
 private:
     void ValidTask();
 
     Util::Renderer m_Root;
     State m_CurrentState = State::START;
 
-    // std::shared_ptr<Text> m_Text;
-    std::shared_ptr<BackgroundImage> m_BackgroundImage;
-    std::shared_ptr<Menu> m_Menu;
+    std::shared_ptr<IScreen> m_CurrentScreen;
 };
 
 #endif

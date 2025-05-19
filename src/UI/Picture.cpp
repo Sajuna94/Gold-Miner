@@ -1,5 +1,16 @@
-//
-// Created by ianli on 2025/3/28.
-//
-
 #include "UI/Picture.h"
+
+#include "config.hpp"
+
+namespace UI {
+    Picture::Picture(const std::string &imagePath, const glm::vec2 position)
+        : m_Image(std::make_shared<Util::Image>(imagePath)) {
+        SetDrawable(m_Image);
+        m_Transform.translation = position;
+    }
+
+    void Picture::FullScreen() {
+        glm::vec2 const size = m_Drawable->GetSize();
+        m_Transform.scale = {WINDOW_WIDTH / size.x, WINDOW_HEIGHT / size.y};
+    }
+} // UI

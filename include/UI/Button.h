@@ -1,29 +1,24 @@
 #ifndef BUTTON_H
 #define BUTTON_H
-
+#include "Core/Math/Shape.h"
 #include "Util/GameObject.hpp"
 #include "Util/Image.hpp"
-#include "IClickable.h"
 
 namespace UI {
-    class Button final : public Util::GameObject, public IClickable {
+    class Button final : public Util::GameObject {
     public:
-        explicit Button(const std::string &imagePath)
-            : GameObject(std::make_unique<Util::Image>(imagePath), 10) {
-        }
+        explicit Button(const std::string &imagePath);
 
-        void SetPosition(const glm::vec2 &Position) { m_Transform.translation = Position; }
-        [[nodiscard]] const glm::vec2 &GetPosition() const { return m_Transform.translation; }
+        [[nodiscard]] bool OnHover() const;
 
-        void Click() override;
+        [[nodiscard]] bool OnClick() const;
 
-        [[nodiscard]] bool IsClicked() override;
-
-        [[nodiscard]] bool OnHover() const override;
+        void SetImage(const std::string &imagePath) const;
 
     private:
-        bool waitingMouseUp = false;
+        const std::shared_ptr<Util::Image> m_Image;
+        rect m_Bounds;
     };
-}
+} // UI
 
 #endif //BUTTON_H
