@@ -1,7 +1,9 @@
 #include "Screen/GameScene.h"
 
 #include "config.hpp"
+#include "Core/ScreenManager.h"
 #include "Game/Factory.h"
+#include "Screen/PropsShop.h"
 #include "UI/Picture.h"
 #include "Util/Input.hpp"
 #include "Util/Time.hpp"
@@ -19,6 +21,10 @@ namespace Screen {
         float fps = CalculateSmoothedFPS(dt);
         m_FPSTextBox->SetText(fmt::format("{:.2f}", fps));
 
+        // TAB to Shop
+        if (Util::Input::IsKeyDown(Util::Keycode::TAB)) {
+            ScreenManager::NextScreen(std::make_unique<PropsShop>());
+        }
 
         switch (m_Hook->GetState()) {
             case Hook::State::STOPPED: {
@@ -37,8 +43,8 @@ namespace Screen {
             break;
             case Hook::State::THROWN: {
                 if (Util::Input::IsKeyDown(Util::Keycode::SPACE))
-                    m_Miner->ReturnHook();
-                if (!m_Hook->GetGlobalHitBox().intersect(rect({WINDOW_WIDTH, WINDOW_HEIGHT})))
+                    m_Miner->ReturnHook();;
+                if (!hit::intersect(m_Hook->GetWorldHitBox(), rect({WINDOW_WIDTH, WINDOW_HEIGHT})))
                     m_Miner->ReturnHook();
 
                 for (const auto &entity: m_Entities) {
@@ -79,6 +85,13 @@ namespace Screen {
 
 
         m_Entities.emplace(Game::Factory::CreateDiamond());
+        m_Entities.emplace(Game::Factory::CreateDiamond());
+        m_Entities.emplace(Game::Factory::CreateDiamond());
+        m_Entities.emplace(Game::Factory::CreateDiamond());
+        m_Entities.emplace(Game::Factory::CreateDiamond());
+        m_Entities.emplace(Game::Factory::CreateDiamond());
+        m_Entities.emplace(Game::Factory::CreateDiamond());
+
         for (const auto &entity: m_Entities) {
             entity->SetZIndex(10);
             m_Game->AddChild(entity);

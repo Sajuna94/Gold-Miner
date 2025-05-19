@@ -1,8 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <iostream>
-
+#include "Logger.h"
 #include "Interface/IHittable.h"
 #include "Util/GameObject.hpp"
 #include "Math/Shape.h"
@@ -12,7 +11,7 @@ public:
     Entity() = default;
 
     ~Entity() override {
-        std::cout << m_Name << " destructed.\n";
+        Logger::Add(m_Name);
     }
 
     explicit Entity(std::string name) : m_Name(std::move(name)) {
@@ -22,7 +21,7 @@ public:
 
     [[nodiscard]] rect GetHitBox() const { return m_HitBox; }
 
-    [[nodiscard]] const rect GetGlobalHitBox() const override;
+    [[nodiscard]] const rect GetWorldHitBox() const override;
 
     [[nodiscard]] const glm::vec2 &GetPosition() const { return m_Transform.translation; }
     virtual void SetPosition(const glm::vec2 &pos) { m_Transform.translation = pos; }

@@ -17,7 +17,6 @@ namespace UI {
 
     private:
         const std::shared_ptr<Util::Image> m_Image;
-        rect m_Bounds;
     };
 } // UI
 

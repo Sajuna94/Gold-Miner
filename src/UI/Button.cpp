@@ -4,13 +4,12 @@
 
 namespace UI {
     Button::Button(const std::string &imagePath)
-        : m_Image(std::make_shared<Util::Image>(imagePath)),
-          m_Bounds(rect(m_Image->GetSize())) {
+        : m_Image(std::make_shared<Util::Image>(imagePath)) {
         SetDrawable(m_Image);
     }
 
     bool Button::OnHover() const {
-        return m_Bounds.contains(Util::Input::GetCursorPosition());
+        return rect(m_Transform.translation, GetScaledSize()).contains(Util::Input::GetCursorPosition());
     }
 
     bool Button::OnClick() const {

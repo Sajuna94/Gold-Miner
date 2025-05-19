@@ -22,15 +22,18 @@ namespace Screen {
     }
 
     void StartMenu::Init(Util::Renderer &m_Root) {
-        m_UI = std::make_shared<Util::GameObject>();
+        m_UI = std::make_shared<UI::Picture>(RESOURCE_DIR "/Textures/Background/start.png");
+        m_UI->FullScreen();
+        m_UI->SetZIndex(-5);
         m_Root.AddChild(m_UI);
 
-        const auto background = std::make_shared<UI::Picture>(RESOURCE_DIR "/Textures/Background/start.png");
-        background->FullScreen();
-        background->SetZIndex(-5);
-        m_UI->AddChild(background);
+        const auto goldMinerText = std::make_shared<UI::Picture>(RESOURCE_DIR "/Textures/Picture/gold-miner-text.png");
+        goldMinerText->m_Transform.translation = {0, 100};
+        goldMinerText->SetZIndex(0);
+        m_UI->AddChild(goldMinerText);
 
         m_StartButton = std::make_shared<UI::Button>(RESOURCE_DIR "/Textures/Button/start-button-normal.png");
+        m_StartButton->m_Transform.translation = {0, -50};
         m_StartButton->SetZIndex(0);
         m_UI->AddChild(m_StartButton);
     }

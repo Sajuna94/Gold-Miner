@@ -1,13 +1,10 @@
-#ifndef START_MENU_H
-#define START_MENU_H
-#include <memory>
-
+#ifndef PROPS_SHOP_H
+#define PROPS_SHOP_H
 #include "Core/Interface/IScreen.h"
-#include "UI/Button.h"
 #include "UI/Picture.h"
 
 namespace Screen {
-    class StartMenu final : public IScreen {
+    class PropsShop final : public IScreen {
     public:
         void Update() override;
 
@@ -17,9 +14,7 @@ namespace Screen {
 
     private:
         std::shared_ptr<UI::Picture> m_UI;
-        std::shared_ptr<UI::Button> m_StartButton;
     };
 } // Screen
 
-
-#endif //START_MENU_H
+#endif //PROPS_SHOP_H
