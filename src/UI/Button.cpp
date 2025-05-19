@@ -5,7 +5,7 @@
 namespace UI {
     Button::Button(const std::string &imagePath)
         : m_Image(std::make_shared<Util::Image>(imagePath)),
-          m_Bounds(rect({}, m_Image->GetSize())) {
+          m_Bounds(rect(m_Image->GetSize())) {
         SetDrawable(m_Image);
     }
 
