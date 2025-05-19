@@ -24,7 +24,7 @@ bool Miner::IsMinerStopped(float epsilon) const {
     return std::abs(m_Velocity) < epsilon;
 }
 
-void Miner::Move(const int dir, const float dt) {
+void Miner::SmoothMove(const int dir, const float dt) {
     if (abs(GetPosition().x) > 350)
         m_Velocity *= -1.0f;
     else if (IsMinerStopped()) {

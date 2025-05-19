@@ -9,11 +9,11 @@ namespace Game {
     public:
         ~Factory() = default;
 
-        static std::shared_ptr<Collection> CreateDiamond();
+        static std::shared_ptr<Collection> CreateDiamond(float zIndex);
 
-        static std::shared_ptr<Collection> CreateGold();
+        static std::shared_ptr<Collection> CreateGold(float zIndex);
 
-        static std::shared_ptr<Collection> CreateStone();
+        static std::shared_ptr<Collection> CreateStone(float zIndex);
     };
 } // Game
 

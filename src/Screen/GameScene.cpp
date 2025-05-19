@@ -26,83 +26,27 @@ namespace Screen {
             ScreenManager::NextScreen(std::make_unique<PropsShop>());
         }
 
-        switch (m_Hook->GetState()) {
-            case Hook::State::STOPPED: {
-                if (Util::Input::IsKeyDown(Util::Keycode::SPACE)) {
-                    m_Miner->ThrowHook();
-                    break;
-                }
-
-                int dir = 0;
-                if (Util::Input::IsKeyPressed(Util::Keycode::A)) dir -= 1;
-                if (Util::Input::IsKeyPressed(Util::Keycode::D)) dir += 1;
-                m_Miner->Move(dir, dt);
-
-                m_Hook->Swing(dt);
-            }
-            break;
-            case Hook::State::THROWN: {
-                if (Util::Input::IsKeyDown(Util::Keycode::SPACE))
-                    m_Miner->ReturnHook();;
-                if (!hit::intersect(m_Hook->GetWorldHitBox(), rect({WINDOW_WIDTH, WINDOW_HEIGHT})))
-                    m_Miner->ReturnHook();
-
-                for (const auto &entity: m_Entities) {
-                    if (m_Hook->IsOverlay(entity)) {
-                        if (const auto &collection = std::dynamic_pointer_cast<Collection>(entity))
-                            m_Hook->HookCollection(collection);
-                        m_Miner->ReturnHook();
-                        break;
-                    }
-                }
-                m_Hook->Advance(dt);
-            }
-            break;
-            case Hook::State::RETURN:
-                if (m_Hook->HasReturned()) {
-                    m_Miner->StopHook();
-
-                    if (const auto &collection = m_Hook->GetHookedCollection()) {
-                        m_Entities.erase(collection);
-                        m_Game->RemoveChild(collection);
-                    }
-                    break;
-                }
-                m_Hook->Advance(dt);
-                break;
+        // Reset
+        if (Util::Input::IsKeyPressed(Util::Keycode::LCTRL) && Util::Input::IsKeyDown(Util::Keycode::R)) {
+            m_Logic->Reset();
         }
+
+        m_Logic->Update(dt);
     }
 
     void GameScene::Init(Util::Renderer &m_Root) {
         m_UI = std::make_shared<Util::GameObject>();
-        m_Game = std::make_shared<Util::GameObject>();
-        m_Root.AddChildren({m_UI, m_Game});
+        m_Logic = std::make_shared<Game::Logic>();
+        m_Logic->Load(1);
+        m_Logic->Resume();
 
-        m_Miner = std::make_shared<Miner>(50);
-        m_Miner->SetPosition({0, 258});
-        m_Hook = m_Miner->GetHook();
-        m_Game->AddChild(m_Miner);
-
-
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-        m_Entities.emplace(Game::Factory::CreateDiamond());
-
-        for (const auto &entity: m_Entities) {
-            entity->SetZIndex(10);
-            m_Game->AddChild(entity);
-        }
-
+        m_Root.AddChildren({m_UI, m_Logic});
         MakeUI();
     }
 
     void GameScene::ShutDown(Util::Renderer &m_Root) {
         m_Root.RemoveChild(m_UI);
-        m_Root.RemoveChild(m_Game);
+        m_Root.RemoveChild(m_Logic);
     }
 
     void GameScene::MakeUI() {

@@ -6,6 +6,8 @@
 #include "Core/Interface/IScreen.h"
 #include "Entity/Hook.h"
 #include "Entity/Miner.h"
+#include "Game/Logic.h"
+#include "Game/Spawner.h"
 #include "UI/TextBox.h"
 
 namespace Screen {
@@ -21,12 +23,12 @@ namespace Screen {
         void MakeUI();
 
         std::shared_ptr<Util::GameObject> m_UI;
-        std::shared_ptr<Util::GameObject> m_Game;
+        std::shared_ptr<Game::Logic> m_Logic;
 
         std::shared_ptr<Miner> m_Miner;
         std::shared_ptr<Hook> m_Hook;
 
-        std::unordered_set<std::shared_ptr<Entity> > m_Entities;
+        std::shared_ptr<Game::Spawner> m_Spawner;
 
         std::deque<float> dtQueue;
         float dtSum = 0.0f;
