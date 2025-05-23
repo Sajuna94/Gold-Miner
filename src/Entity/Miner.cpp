@@ -25,14 +25,14 @@ bool Miner::IsMinerStopped(float epsilon) const {
 }
 
 void Miner::SmoothMove(const int dir, const float dt) {
-    if (abs(GetPosition().x) > 350)
-        m_Velocity *= -1.0f;
-    else if (IsMinerStopped()) {
+    if (IsMinerStopped()) {
         m_Velocity = static_cast<float>(dir) * kInitSpeed;
     } else {
         m_Velocity = glm::clamp((m_Velocity + static_cast<float>(dir) * kAccelRate * dt) * kDecelFactor,
                                 -kMaxSpeed, kMaxSpeed);
     }
+    if (abs(GetPosition().x) > 350)
+        m_Velocity *= -1.0f;
 
     const float mover = m_Velocity * dt;
     m_Transform.translation.x += mover;

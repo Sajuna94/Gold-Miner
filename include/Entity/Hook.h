@@ -1,6 +1,6 @@
 #ifndef HOOK_H
 #define HOOK_H
-#include "Core/Collection.h"
+#include "Collection.h"
 #include "UI/Picture.h"
 
 /**

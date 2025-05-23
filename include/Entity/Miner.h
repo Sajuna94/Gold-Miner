@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "Hook.h"
-#include "Core/Entity.h"
 #include "UI/Picture.h"
 
 

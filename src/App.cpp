@@ -33,6 +33,7 @@ void App::Update() {
     m_Root.Update();
 
     ScreenManager::UpdateScreen();
+    Logger::Flush();
 }
 
 void App::End() {

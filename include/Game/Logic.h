@@ -1,6 +1,9 @@
 #ifndef LOGIC_H
 #define LOGIC_H
+#include <unordered_set>
+
 #include "Spawner.h"
+#include "Entity/Bomb.h"
 #include "Entity/Miner.h"
 #include "Util/GameObject.hpp"
 
@@ -29,7 +32,11 @@ namespace Game {
         std::shared_ptr<Miner> m_Miner;
         std::shared_ptr<Spawner> m_Spawner;
 
-        void HandleMiner(float dt) const;
+        std::unordered_set<std::shared_ptr<Bomb>> m_ActiveBombs;
+
+        void HandleMinerState(float dt);
+
+        void UpdateActiveBombs();
     };
 } // Game
 

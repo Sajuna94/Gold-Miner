@@ -1,7 +1,9 @@
 #include "Game/Logic.h"
 
+#include "Entity/Bomb.h"
 #include "Game/Factory.h"
 #include "Util/Input.hpp"
+#include "Util/Time.hpp"
 
 namespace Game {
     Logic::Logic() {
@@ -19,7 +21,8 @@ namespace Game {
     void Logic::Update(const float dt) {
         switch (m_State) {
             case State::RUNNING:
-                HandleMiner(dt);
+                HandleMinerState(dt);
+                UpdateActiveBombs();
                 break;
             case State::PAUSED:
                 break;
@@ -35,28 +38,34 @@ namespace Game {
     }
 
     void Logic::Reset() {
-        // Reset Spawner
+        // reset spawner
         for (const auto &entity: m_Spawner->GetSpawnedEntities())
             RemoveChild(entity);
         m_Spawner->Clear();
-        while (m_Spawner->GetSpawnedEntities().size() < 20) {
-            if (const auto &entity = m_Spawner->TryEnqueueAndSpawn(Factory::CreateDiamond(10)))
+        Logger::Flush();
+
+        const auto time = Util::Time::GetElapsedTimeMs();
+        while (m_Spawner->GetSpawnedEntities().size() < 10) {
+            if (const auto &entity = m_Spawner->TryEnqueueAndSpawn(Factory::CreateBomb(10)))
                 AddChild(entity);
         }
-        //
-        Logger::Flush();
+        while (m_Spawner->GetSpawnedEntities().size() < 25) {
+            if (const auto &entity = m_Spawner->TryEnqueueAndSpawn(Factory::CreateRandomEntity(10)))
+                AddChild(entity);
+        }
+        printf("Created %d entities in %.2f ms\n", 25, Util::Time::GetElapsedTimeMs() - time);
     }
 
-    void Logic::HandleMiner(const float dt) const {
+    void Logic::HandleMinerState(const float dt) {
         switch (const auto &hook = m_Miner->GetHook(); hook->GetState()) {
             case Hook::State::STOPPED: {
-                if (Util::Input::IsKeyDown(Util::Keycode::SPACE))
-                    m_Miner->ThrowHook();
-
                 int dir = 0;
                 if (Util::Input::IsKeyPressed(Util::Keycode::A)) dir -= 1;
                 if (Util::Input::IsKeyPressed(Util::Keycode::D)) dir += 1;
                 m_Miner->SmoothMove(dir, dt);
+
+                if (Util::Input::IsKeyDown(Util::Keycode::SPACE))
+                    m_Miner->ThrowHook();
 
                 hook->Swing(dt);
                 break;
@@ -71,6 +80,11 @@ namespace Game {
                     if (hook->IsOverlay(entity)) {
                         if (const auto &collection = std::dynamic_pointer_cast<Collection>(entity))
                             hook->HookCollection(collection);
+                        if (const auto &bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
+                            bomb->Explode();
+                            m_Spawner->Despawn(bomb);
+                            m_ActiveBombs.emplace(bomb);
+                        }
                         m_Miner->ReturnHook();
                         break;
                     }
@@ -84,12 +98,40 @@ namespace Game {
 
                     if (const auto &collection = hook->GetHookedCollection()) {
                         m_Spawner->Despawn(collection);
-                        hook->RemoveChild(collection);
+                        RemoveChild(collection);
+                        hook->ReleaseCollection();
                     }
                     break;
                 }
                 hook->Advance(dt);
                 break;
+        }
+    }
+
+    void Logic::UpdateActiveBombs() {
+        const auto tmpActiveBombs = m_ActiveBombs;
+        for (const auto &bomb: tmpActiveBombs) {
+            if (!bomb->HasExploded())
+                continue;
+
+            std::vector<std::shared_ptr<Entity> > toDespawn;
+            for (const auto &entity: m_Spawner->GetSpawnedEntities()) {
+                if (entity->GetName() == "Rock")
+                    continue;
+                if (bomb->InBlastRadius(entity))
+                    toDespawn.emplace_back(entity);
+            }
+            for (const auto &entity: toDespawn) {
+                if (auto other = std::dynamic_pointer_cast<Bomb>(entity)) {
+                    other->Explode();
+                    m_ActiveBombs.emplace(other);
+                } else {
+                    RemoveChild(entity);
+                }
+                m_Spawner->Despawn(entity);
+            }
+            m_ActiveBombs.erase(bomb);
+            RemoveChild(bomb);
         }
     }
 } // Game

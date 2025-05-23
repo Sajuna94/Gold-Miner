@@ -4,6 +4,16 @@
 #include "Util/Animation.hpp"
 
 namespace Game {
+    std::shared_ptr<Entity> Factory::CreateRandomEntity(const float zIndex) {
+        static std::array<std::function<std::shared_ptr<Entity>(float)>, 4> creators = {
+            CreateDiamond,
+            CreateGold,
+            CreateStone,
+            CreateBomb,
+        };
+        return creators[rand_int(0, creators.size() - 1)](zIndex);
+    }
+
     std::shared_ptr<Collection> Factory::CreateDiamond(const float zIndex) {
         auto anim = std::make_shared<Util::Animation>(
             std::vector<std::string>{
@@ -19,7 +29,7 @@ namespace Game {
         anim->SetCurrentFrame(rand_int(0, static_cast<int>(anim->GetFrameCount()) - 1));
 
         auto diamond = std::make_unique<Collection>(std::move(anim), "Diamond", 500, 150.0f);
-        diamond->SetHitBox(rect({20, 30}));
+        diamond->SetHitBox(rect({30, 20}));
         diamond->SetZIndex(zIndex);
 
         return diamond;
@@ -39,7 +49,7 @@ namespace Game {
         anim->SetCurrentFrame(rand_int(0, static_cast<int>(anim->GetFrameCount()) - 1));
 
         auto gold = std::make_unique<Collection>(std::move(anim), "Gold", 500, 70.0f);
-        gold->SetHitBox(rect({35, 25}));
+        gold->SetHitBox(rect({88, 88}));
         gold->SetZIndex(zIndex);
 
         return gold;
@@ -53,9 +63,19 @@ namespace Game {
         auto image = std::make_shared<Util::Image>(paths[rand_int(0, 1)]);
 
         auto stone = std::make_unique<Collection>(std::move(image), "Stone", 50, 300.0f);
-        stone->SetHitBox(rect(stone->GetScaledSize() * 0.8f));
+        stone->SetHitBox(rect(stone->GetScaledSize() * 0.9f));
         stone->SetZIndex(zIndex);
 
         return stone;
+    }
+
+    std::shared_ptr<Bomb> Factory::CreateBomb(float zIndex) {
+        auto static sound = std::make_shared<Util::SFX>(RESOURCE_DIR "/Sounds/medium-explosion.mp3");
+
+        auto bomb = std::make_unique<Bomb>(zIndex);
+        bomb->SetHitBox(rect({55, 68}));
+        bomb->SetSound(sound);
+
+        return bomb;
     }
 } // Game

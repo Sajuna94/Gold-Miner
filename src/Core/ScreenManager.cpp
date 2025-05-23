@@ -18,7 +18,6 @@ void ScreenManager::UpdateScreen() {
         }
         m_CurrentScreen = std::move(m_NextScreen);
         m_CurrentScreen->Init(*m_Root);
-        Logger::Flush();
     }
     m_CurrentScreen->Update();
 }

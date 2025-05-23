@@ -26,15 +26,17 @@ namespace Game {
     bool Spawner::TryPlaceSafePosition(const std::shared_ptr<Entity> &entity) const {
         static constexpr int MAX_TRY_ATTEMPTS = 20;
 
+        const auto halfArea = (m_SpawnArea.size - entity->GetHitBox().size) * 0.5f;
+
         std::random_device rd;
         std::mt19937 rng(rd());
         std::uniform_real_distribution<float> xDist(
-            m_SpawnArea.center.x - m_SpawnArea.size.x * 0.5f,
-            m_SpawnArea.center.x + m_SpawnArea.size.x * 0.5f
+            m_SpawnArea.center.x - halfArea.x,
+            m_SpawnArea.center.x + halfArea.x
         );
         std::uniform_real_distribution<float> yDist(
-            m_SpawnArea.center.y - m_SpawnArea.size.y * 0.5f,
-            m_SpawnArea.center.y + m_SpawnArea.size.y * 0.5f
+            m_SpawnArea.center.y - halfArea.y,
+            m_SpawnArea.center.y + halfArea.y
         );
 
         for (int i = 0; i < MAX_TRY_ATTEMPTS; ++i) {
@@ -64,7 +66,7 @@ namespace Game {
     }
 
     void Spawner::Clear() {
-        std::queue<std::shared_ptr<Entity>> emptyQueue;
+        std::queue<std::shared_ptr<Entity> > emptyQueue;
         std::swap(m_PendingSpawnQueue, emptyQueue);
         m_SpawnedEntities.clear();
     }
