@@ -1,13 +1,9 @@
 #ifndef GAME_SCENE_H
 #define GAME_SCENE_H
 #include <deque>
-#include <unordered_set>
 
 #include "Core/Interface/IScreen.h"
-#include "Entity/Hook.h"
-#include "Entity/Miner.h"
 #include "Game/Logic.h"
-#include "Game/Spawner.h"
 #include "UI/TextBox.h"
 
 namespace Screen {
@@ -19,16 +15,14 @@ namespace Screen {
 
         void ShutDown(Util::Renderer &m_Root) override;
 
+        void SetInventory(std::unordered_map<std::string, int> inventory) { m_Inventory = std::move(inventory); }
+
     private:
         void MakeUI();
 
         std::shared_ptr<Util::GameObject> m_UI;
+        std::unordered_map<std::string, int> m_Inventory;
         std::shared_ptr<Game::Logic> m_Logic;
-
-        std::shared_ptr<Miner> m_Miner;
-        std::shared_ptr<Hook> m_Hook;
-
-        std::shared_ptr<Game::Spawner> m_Spawner;
 
         std::deque<float> dtQueue;
         float dtSum = 0.0f;

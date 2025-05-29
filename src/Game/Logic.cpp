@@ -1,7 +1,9 @@
 #include "Game/Logic.h"
 
+#include "Core/LevelManager.h"
 #include "Entity/Bomb.h"
 #include "Game/Factory.h"
+#include "Game/Level.h"
 #include "Util/Input.hpp"
 #include "Util/Time.hpp"
 
@@ -14,18 +16,23 @@ namespace Game {
         m_Spawner = std::make_shared<Spawner>(rect({0, -110}, {WINDOW_WIDTH, WINDOW_HEIGHT - 220}));
     }
 
-    void Logic::Load(int level) {
-        Reset();
-    }
-
     void Logic::Update(const float dt) {
         switch (m_State) {
             case State::RUNNING:
                 HandleMinerState(dt);
                 UpdateActiveBombs();
+                UpdateActiveTnts(dt);
                 break;
             case State::PAUSED:
                 break;
+        }
+
+        if (Util::Input::IsKeyDown(Util::Keycode::Q) && m_Inventory["Tnt"] > 0) {
+            m_Inventory["Tnt"]--;
+            auto tnt = Factory::CreateTnt(20);
+            tnt->SetPosition(m_Miner->GetPosition());
+            AddChild(tnt);
+            m_ActiveTnts.emplace(tnt);
         }
     }
 
@@ -37,23 +44,23 @@ namespace Game {
         m_State = State::PAUSED;
     }
 
+    void Logic::Load(const int levelIndex) {
+        m_Level = LevelManager::CreateLevel(levelIndex);
+        Reset();
+    }
+
     void Logic::Reset() {
-        // reset spawner
         for (const auto &entity: m_Spawner->GetSpawnedEntities())
             RemoveChild(entity);
         m_Spawner->Clear();
-        Logger::Flush();
+        m_Spawner->SetSpawnLimits(m_Level->GetSpawnLimits());
 
-        const auto time = Util::Time::GetElapsedTimeMs();
+        const auto start = Util::Time::GetElapsedTimeMs();
         while (m_Spawner->GetSpawnedEntities().size() < 10) {
-            if (const auto &entity = m_Spawner->TryEnqueueAndSpawn(Factory::CreateBomb(10)))
+            if (const auto &entity = m_Spawner->TrySpawn())
                 AddChild(entity);
         }
-        while (m_Spawner->GetSpawnedEntities().size() < 25) {
-            if (const auto &entity = m_Spawner->TryEnqueueAndSpawn(Factory::CreateRandomEntity(10)))
-                AddChild(entity);
-        }
-        printf("Created %d entities in %.2f ms\n", 25, Util::Time::GetElapsedTimeMs() - time);
+        printf("Created %d entities in %.2f ms\n", 10, Util::Time::GetElapsedTimeMs() - start);
     }
 
     void Logic::HandleMinerState(const float dt) {
@@ -132,6 +139,38 @@ namespace Game {
             }
             m_ActiveBombs.erase(bomb);
             RemoveChild(bomb);
+        }
+    }
+
+    void Logic::UpdateActiveTnts(const float dt) {
+        const auto tmpActiveBombs = m_ActiveTnts;
+        for (const auto &tnt: tmpActiveBombs) {
+            tnt->m_Transform.rotation += 0.2f;
+            tnt->Move(glm::vec2(0, -0.3f), dt);
+
+            std::vector<std::shared_ptr<Entity> > toDespawn;
+            for (const auto &entity: m_Spawner->GetSpawnedEntities()) {
+                if (entity->GetName() != "Rock")
+                    continue;
+                if (tnt->IsOverlay(entity)) {
+                    // create explode effect
+                    auto bomb = Factory::CreateBomb(tnt->GetZIndex(), 100);
+                    bomb->Explode();
+                    bomb->SetPosition(tnt->GetPosition());
+                    AddChild(bomb);
+                    m_ActiveBombs.emplace(bomb);
+
+                    // remove tnt
+                    RemoveChild(tnt);
+                    m_ActiveTnts.erase(tnt);
+
+                    toDespawn.emplace_back(entity);
+                }
+            }
+            for (const auto &entity: toDespawn) {
+                m_Spawner->Despawn(entity);
+                RemoveChild(entity);
+            }
         }
     }
 } // Game

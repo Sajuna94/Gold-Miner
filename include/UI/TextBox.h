@@ -10,7 +10,7 @@ namespace UI {
             LEFT, MIDDLE, RIGHT
         };
 
-        explicit TextBox(float size = 20, const std::string &text = "", Align align = Align::MIDDLE,
+        explicit TextBox(float size = 20, const std::string &text = " ", Align align = Align::MIDDLE,
                          const std::string &path = RESOURCE_DIR "/Font/Caveat/static/Caveat-Bold.ttf");
 
         void SetColor(Util::Color color) const;

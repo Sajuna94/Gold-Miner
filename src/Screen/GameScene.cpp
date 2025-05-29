@@ -1,6 +1,7 @@
 #include "Screen/GameScene.h"
 
 #include "config.hpp"
+#include "Core/LevelManager.h"
 #include "Core/ScreenManager.h"
 #include "Game/Factory.h"
 #include "Screen/PropsShop.h"
@@ -23,7 +24,9 @@ namespace Screen {
 
         // TAB to Shop
         if (Util::Input::IsKeyDown(Util::Keycode::TAB)) {
-            ScreenManager::NextScreen(std::make_unique<PropsShop>());
+            auto next = std::make_unique<PropsShop>();
+            next->SetMoney(9999);
+            ScreenManager::NextScreen(std::move(next));
         }
 
         // Reset
@@ -37,7 +40,8 @@ namespace Screen {
     void GameScene::Init(Util::Renderer &m_Root) {
         m_UI = std::make_shared<Util::GameObject>();
         m_Logic = std::make_shared<Game::Logic>();
-        m_Logic->Load(1);
+        m_Logic->SetInventory(m_Inventory);
+        m_Logic->Load(LevelManager::GetLevelIndex());
         m_Logic->Resume();
 
         m_Root.AddChildren({m_UI, m_Logic});

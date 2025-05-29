@@ -9,10 +9,15 @@ class LevelManager {
 public:
     static std::shared_ptr<Game::Level> CreateLevel(int levelIndex);
 
+    static void NextLevel();
+
+    static int GetLevelIndex();
 private:
     LevelManager() = default;
 
     ~LevelManager() = default;
+
+    static inline int s_LevelIndex = 1;
 };
 
 

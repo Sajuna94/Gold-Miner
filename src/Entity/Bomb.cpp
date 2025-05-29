@@ -35,6 +35,10 @@ bool Bomb::InBlastRadius(const std::shared_ptr<Entity> &entity) const {
     return m_Radius >= length(GetPosition() - entity->GetPosition());
 }
 
+void Bomb::SetEffect(const std::shared_ptr<Util::Animation> &effect) {
+    m_Effect = effect;
+}
+
 void Bomb::SetSound(const std::shared_ptr<Util::SFX> &sound) {
     m_Sound = sound;
 }
