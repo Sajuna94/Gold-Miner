@@ -51,12 +51,12 @@ namespace Game {
 
         const int persent = rand_int(1, 10);
         float mult;
-        if (persent <= 2)
+        if (persent <= 4)
             mult = rand_int(50, 80) / 100.0f;
-        else if (persent <= 8)
+        else if (persent <= 9)
             mult = rand_int(120, 150) / 100.0f;
         else
-            mult = rand_int(180, 220) / 100.0f;
+            mult = rand_int(170, 200) / 100.0f;
 
         gold->m_Transform.scale = glm::vec2(mult);
         gold->SetMoney(gold->GetMoney() * mult);

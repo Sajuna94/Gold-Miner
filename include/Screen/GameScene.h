@@ -24,9 +24,17 @@ namespace Screen {
         std::unordered_map<std::string, int> m_Inventory;
         std::shared_ptr<Game::Logic> m_Logic;
 
+        int m_ElapsedMoney = 0;
+        std::shared_ptr<UI::TextBox> m_MoneyTextBox;
+        std::shared_ptr<UI::TextBox> m_GoalTextBox;
+        std::shared_ptr<UI::TextBox> m_LevelTextBox;
+        std::shared_ptr<UI::TextBox> m_TimeTextBox;
+
         std::deque<float> dtQueue;
         float dtSum = 0.0f;
-        std::shared_ptr<UI::TextBox> m_FPSTextBox;
+        std::shared_ptr<UI::TextBox> m_FpsTextBox;
+
+        void RefreshLevel();
 
         float CalculateSmoothedFPS(float dt);
     };

@@ -12,6 +12,8 @@ public:
     static void NextLevel();
 
     static int GetLevelIndex();
+
+    static void SetLevelIndex(int index);
 private:
     LevelManager() = default;
 

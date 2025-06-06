@@ -23,6 +23,10 @@ namespace Game {
 
         void Clear();
 
+        [[nodiscard]] int GetLimitTotal();
+
+        void AddSpawned(const std::shared_ptr<Entity>& entity);
+
     private:
         mutable std::mt19937 m_Rng{std::random_device{}()};
         rect m_SpawnArea;

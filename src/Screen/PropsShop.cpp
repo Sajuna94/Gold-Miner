@@ -35,7 +35,7 @@ namespace Screen {
             const auto &item = c_ShopItemTable.at(it->second);
 
             if (btn->OnHover()) {
-                m_DescriptionTextBox->SetText(item.description);
+                m_TipsTextBox->SetText(item.description);
                 hoverFlag = true;
             }
 
@@ -50,7 +50,7 @@ namespace Screen {
             ++it;
         }
         if (!hoverFlag)
-            m_DescriptionTextBox->SetText(" ");
+            m_TipsTextBox->SetText(" ");
     }
 
     void PropsShop::Init(Util::Renderer &m_Root) {
@@ -74,28 +74,29 @@ namespace Screen {
         m_UI->AddChild(desk);
 
         m_NextLevelButton = std::make_shared<UI::Button>(RESOURCE_DIR "/Textures/Button/next-btn-normal.png");
-        m_NextLevelButton->m_Transform.translation =
-                (glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) - m_NextLevelButton->GetScaledSize()) * 0.5f * 0.9f;
         m_NextLevelButton->m_Transform.scale = glm::vec2(2);
+        m_NextLevelButton->m_Transform.translation = (glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) - m_NextLevelButton->GetScaledSize()) * 0.5f + glm::vec2(-20, -25);
         m_UI->AddChild(m_NextLevelButton);
 
         const auto nextLevelTextBox = std::make_shared<UI::TextBox>(30, "Next Level");
-        nextLevelTextBox->m_Transform.translation = m_NextLevelButton->GetTransform().translation;
-        nextLevelTextBox->m_Transform.translation.x += 15;
+        nextLevelTextBox->SetPosition(m_NextLevelButton->GetTransform().translation + glm::vec2(8, 0.0f));
         nextLevelTextBox->SetColor(Util::Color::FromName(Util::Colors::WHITE));
         m_UI->AddChild(nextLevelTextBox);
 
-        m_CurrentMoneyTextBox = std::make_shared<UI::TextBox>(30, std::to_string(m_CurrentMoney),
-                                                              UI::TextBox::Align::LEFT);
-        m_CurrentMoneyTextBox->m_Transform.translation =
-                (glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) - m_NextLevelButton->GetScaledSize()) * 0.5f * 0.9f;
-        m_CurrentMoneyTextBox->m_Transform.translation.x *= -1;
+        const auto priceBg = std::make_shared<UI::Picture>(RESOURCE_DIR "/Textures/Picture/price-bg.png");
+        priceBg->m_Transform.scale = glm::vec2(0.7f);
+        priceBg->AlignTo(UI::Picture::Align::TOP_LEFT, {20, -25});
+        m_UI->AddChild(priceBg);
+
+        m_CurrentMoneyTextBox = std::make_shared<UI::TextBox>(30, std::to_string(m_CurrentMoney), UI::TextBox::Align::LEFT);
+        m_CurrentMoneyTextBox->SetPosition(priceBg->GetPosition() + glm::vec2(-3, 2));
         m_CurrentMoneyTextBox->SetColor(Util::Color::FromName(Util::Colors::WHITE));
         m_UI->AddChild(m_CurrentMoneyTextBox);
 
-        m_DescriptionTextBox = std::make_shared<UI::TextBox>(50);
-        m_DescriptionTextBox->m_Transform.translation = desk->m_Transform.translation + glm::vec2(0, -50);
-        m_UI->AddChild(m_DescriptionTextBox);
+        m_TipsTextBox = std::make_shared<UI::TextBox>(50, " ");
+        m_TipsTextBox->m_Transform.translation = desk->m_Transform.translation + glm::vec2(0, -50);
+        m_TipsTextBox->SetColor(Util::Color::FromName(Util::Colors::BROWN));
+        m_UI->AddChild(m_TipsTextBox);
 
         for (const auto &child: m_UI->GetChildren()) {
             child->SetZIndex(10);
@@ -106,7 +107,7 @@ namespace Screen {
     }
 
     void PropsShop::RefreshShopItems() {
-        for (const auto &[btn, name] : m_ShopButtons)
+        for (const auto &[btn, name]: m_ShopButtons)
             m_UI->RemoveChild(btn);
         m_ShopButtons.clear();
 
@@ -130,12 +131,16 @@ namespace Screen {
         float padding = 170;
         for (size_t i = 0; i < count; ++i) {
             auto item = c_ShopItemTable.at(pool[i]);
+
             auto btn = std::make_shared<UI::Button>(item.path);
-            btn->m_Transform.translation = glm::vec2(-(WINDOW_WIDTH * 0.5f) + padding,
-                                                     m_DescriptionTextBox->m_Transform.translation.y + 200);
-            btn->SetZIndex(20.0f + i);
+            btn->m_Transform.translation = glm::vec2(
+                -(WINDOW_WIDTH * 0.5f) + padding,
+                m_TipsTextBox->m_Transform.translation.y + 200);
+            btn->SetZIndex(20.0f + static_cast<float>(i));
+
             m_UI->AddChild(btn);
             m_ShopButtons[btn] = item.name;
+
             padding += btn->GetScaledSize().x + 20;
         }
     }

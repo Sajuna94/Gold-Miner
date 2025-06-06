@@ -63,7 +63,7 @@ namespace Screen {
 
         std::shared_ptr<UI::TextBox> m_CurrentMoneyTextBox;
         std::shared_ptr<UI::Button> m_NextLevelButton;
-        std::shared_ptr<UI::TextBox> m_DescriptionTextBox;
+        std::shared_ptr<UI::TextBox> m_TipsTextBox;
 
         void MakeUI();
 

@@ -50,6 +50,14 @@ namespace Game {
         m_Spawned.clear();
     }
 
+    int Spawner::GetLimitTotal() {
+        int total = 0;
+        for (const auto &[_, count]: m_SpawnLimits) {
+            total += count;
+        }
+        return total;
+    }
+
     std::optional<std::string> Spawner::PickSpawnName() {
         std::vector<std::string> names;
         std::vector<int> weights;
@@ -95,5 +103,9 @@ namespace Game {
                 return true;
         }
         return false;
+    }
+
+    void Spawner::AddSpawned(const std::shared_ptr<Entity> &entity) {
+        m_Spawned.emplace_back(entity);
     }
 } // Game

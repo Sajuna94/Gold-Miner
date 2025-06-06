@@ -1,5 +1,7 @@
 #include "Core/LevelManager.h"
 
+#define MAX_LEVEL_INDEX 10
+
 std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
     if (levelIndex == 0)
         return std::make_shared<Game::Level>(9999, 0);
@@ -18,7 +20,7 @@ std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
             case 5: level->SetEntityLimit("Diamond", 3); break;
             default: break;
         }
-    } else if (levelIndex <= 10) {
+    } else if (levelIndex <= MAX_LEVEL_INDEX) {
         level = std::make_shared<Game::Level>(60, 800 + levelIndex * 50);
         level->SetSpawnLimits({
             {"Rock", 3},
@@ -39,5 +41,14 @@ void LevelManager::NextLevel() {
 int LevelManager::GetLevelIndex() {
     return s_LevelIndex;
 }
+
+void LevelManager::SetLevelIndex(const int index) {
+    if (index < 0 || MAX_LEVEL_INDEX < index) {
+        printf("[!] Level index out of range\n");
+        return;
+    }
+    s_LevelIndex = index;
+}
+
 
 
