@@ -42,6 +42,8 @@ public:
 
     void ReleaseCollection();
 
+    void SetResistance(float resistance);
+
     /**
      * @brief Advances the hook's position based on its velocity direction.
      * @param dt The time delta to apply to the movement.
@@ -61,6 +63,7 @@ private:
 
     float m_SwingAngle = 0.0f;
     float m_TimeAcc = 0.0f;
+    float m_WeightResistance = 0.0f;
 
     glm::vec2 m_ThrownPosition{};
     glm::vec2 m_VelocityDirection{};

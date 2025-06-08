@@ -10,8 +10,14 @@
 namespace Screen {
     void PropsShop::Update() {
         if (Util::Input::IsKeyDown(Util::Keycode::TAB)) {
+            for (const auto &[str, item] : c_ShopItemTable) {
+                m_Inventory[str] = 99;
+            }
             LevelManager::NextLevel();
-            ScreenManager::NextScreen(std::make_unique<GameScene>());
+
+            auto next = std::make_unique<GameScene>();
+            next->SetInventory(m_Inventory);
+            ScreenManager::NextScreen(std::move(next));
         }
         if (Util::Input::IsKeyPressed(Util::Keycode::LCTRL) && Util::Input::IsKeyDown(Util::Keycode::R)) {
             RefreshShopItems();
@@ -30,21 +36,22 @@ namespace Screen {
         }
 
         bool hoverFlag = false;
-        for (auto it = m_ShopButtons.begin(); it != m_ShopButtons.end();) {
-            auto &btn = it->first;
-            const auto &item = c_ShopItemTable.at(it->second);
+        for (auto it = m_Products.begin(); it != m_Products.end();) {
+            const auto &item = c_ShopItemTable.at(it->name);
 
-            if (btn->OnHover()) {
+            if (it->imgBtn->OnHover()) {
                 m_TipsTextBox->SetText(item.description);
                 hoverFlag = true;
             }
 
-            if (btn->OnClick() && m_CurrentMoney >= item.cost) {
+            if (it->imgBtn->OnClick() && m_CurrentMoney >= item.cost) {
                 m_CurrentMoney -= item.cost;
                 m_CurrentMoneyTextBox->SetText(std::to_string(m_CurrentMoney));
                 m_Inventory[item.name]++;
-                m_UI->RemoveChild(btn);
-                it = m_ShopButtons.erase(it);
+                m_UI->RemoveChild(it->imgBtn);
+                m_UI->RemoveChild(it->costTb);
+                m_CashSound->Play();
+                it = m_Products.erase(it);
                 continue;
             }
             ++it;
@@ -58,6 +65,8 @@ namespace Screen {
         m_UI->FullScreen();
         m_UI->SetZIndex(-5);
         m_Root.AddChild(m_UI);
+
+        m_CashSound = std::make_shared<Util::SFX>(RESOURCE_DIR "/Sounds/cash-register.mp3");
 
         MakeUI();
         RefreshShopItems();
@@ -75,7 +84,9 @@ namespace Screen {
 
         m_NextLevelButton = std::make_shared<UI::Button>(RESOURCE_DIR "/Textures/Button/next-btn-normal.png");
         m_NextLevelButton->m_Transform.scale = glm::vec2(2);
-        m_NextLevelButton->m_Transform.translation = (glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) - m_NextLevelButton->GetScaledSize()) * 0.5f + glm::vec2(-20, -25);
+        m_NextLevelButton->m_Transform.translation =
+                (glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) - m_NextLevelButton->GetScaledSize()) * 0.5f + glm::vec2(
+                    -20, -25);
         m_UI->AddChild(m_NextLevelButton);
 
         const auto nextLevelTextBox = std::make_shared<UI::TextBox>(30, "Next Level");
@@ -88,7 +99,8 @@ namespace Screen {
         priceBg->AlignTo(UI::Picture::Align::TOP_LEFT, {20, -25});
         m_UI->AddChild(priceBg);
 
-        m_CurrentMoneyTextBox = std::make_shared<UI::TextBox>(30, std::to_string(m_CurrentMoney), UI::TextBox::Align::LEFT);
+        m_CurrentMoneyTextBox = std::make_shared<UI::TextBox>(30, std::to_string(m_CurrentMoney),
+                                                              UI::TextBox::Align::LEFT);
         m_CurrentMoneyTextBox->SetPosition(priceBg->GetPosition() + glm::vec2(-3, 2));
         m_CurrentMoneyTextBox->SetColor(Util::Color::FromName(Util::Colors::WHITE));
         m_UI->AddChild(m_CurrentMoneyTextBox);
@@ -107,14 +119,18 @@ namespace Screen {
     }
 
     void PropsShop::RefreshShopItems() {
-        for (const auto &[btn, name]: m_ShopButtons)
-            m_UI->RemoveChild(btn);
-        m_ShopButtons.clear();
+        for (const auto& product: m_Products) {
+            m_UI->RemoveChild(product.imgBtn);
+            m_UI->RemoveChild(product.costTb);
+        }
+        m_Products.clear();
 
         const auto level = LevelManager::CreateLevel(LevelManager::GetLevelIndex() + 1);
         std::vector<std::string> pool = {
             "StrengthDrink"
         };
+
+        // according to level entity pool
         for (int i = level->GetSpawnLimits()["Rock"]; i > 0; --i)
             pool.emplace_back("Tnt");
         if (level->GetSpawnLimits()["Stone"] > 0)
@@ -122,26 +138,34 @@ namespace Screen {
         if (level->GetSpawnLimits()["Diamond"] > 0)
             pool.emplace_back("DiamondPolish");
 
-        constexpr size_t MaxItems = 7;
+        constexpr size_t MaxItems = 5;
         std::random_device rd;
         std::mt19937 gen(rd());
         std::shuffle(pool.begin(), pool.end(), gen);
         const size_t count = std::min(pool.size(), MaxItems);
 
-        float padding = 170;
+        float padding = 150;
         for (size_t i = 0; i < count; ++i) {
             auto item = c_ShopItemTable.at(pool[i]);
 
-            auto btn = std::make_shared<UI::Button>(item.path);
-            btn->m_Transform.translation = glm::vec2(
+            ProductObject productObj;
+            productObj.name = item.name;
+            productObj.imgBtn = std::make_shared<UI::Button>(item.path);
+            productObj.imgBtn->m_Transform.translation = glm::vec2(
                 -(WINDOW_WIDTH * 0.5f) + padding,
                 m_TipsTextBox->m_Transform.translation.y + 200);
-            btn->SetZIndex(20.0f + static_cast<float>(i));
+            productObj.costTb = std::make_shared<UI::TextBox>(40, std::to_string(item.cost) + "$");
+            productObj.costTb->SetPosition(productObj.imgBtn->m_Transform.translation + glm::vec2(0, -90));
+            productObj.costTb->SetColor(Util::Color::FromName(Util::Colors::WHITE));
 
-            m_UI->AddChild(btn);
-            m_ShopButtons[btn] = item.name;
+            productObj.imgBtn->SetZIndex(20.0f + static_cast<float>(i));
+            productObj.costTb->SetZIndex(40.0f);
 
-            padding += btn->GetScaledSize().x + 20;
+            m_UI->AddChild(productObj.imgBtn);
+            m_UI->AddChild(productObj.costTb);
+
+            m_Products.emplace_back(productObj);
+            padding += productObj.imgBtn->GetScaledSize().x + 30;
         }
     }
 } // Screen

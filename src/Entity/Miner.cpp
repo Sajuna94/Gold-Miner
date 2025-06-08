@@ -25,14 +25,8 @@ bool Miner::IsMinerStopped(float epsilon) const {
 }
 
 void Miner::SmoothMove(const int dir, const float dt) {
-    if (IsMinerStopped()) {
-        m_Velocity = static_cast<float>(dir) * kInitSpeed;
-    } else {
-        m_Velocity = glm::clamp((m_Velocity + static_cast<float>(dir) * kAccelRate * dt) * kDecelFactor,
-                                -kMaxSpeed, kMaxSpeed);
-    }
-    if (abs(GetPosition().x) > 350)
-        m_Velocity *= -1.0f;
+    m_Velocity = glm::clamp((m_Velocity + static_cast<float>(dir) * kAccelRate * dt) * kDecelFactor,
+                            -kMaxSpeed, kMaxSpeed);
 
     const float mover = m_Velocity * dt;
     m_Transform.translation.x += mover;
@@ -50,3 +44,10 @@ void Miner::SetPosition(const glm::vec2 &pos) {
     m_Wheels[0]->m_Transform.translation = GetPosition() + glm::vec2(-42, -80);
     m_Wheels[1]->m_Transform.translation = GetPosition() + glm::vec2(42, -80);
 }
+
+void Miner::Reset() {
+    StopHook();
+    SetPosition(GetPosition());
+    m_Velocity = 0.0f;
+}
+

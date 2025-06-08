@@ -21,6 +21,8 @@ public:
 
     [[nodiscard]] bool IsMinerStopped(float epsilon = 1e-6f) const;
 
+    void StopMove() { m_Velocity = 0; }
+
     void SmoothMove(int dir, float dt);
 
     void StopHook() const { m_Hook->Stop(); }
@@ -31,6 +33,10 @@ public:
         m_Hook->Return();
         m_Velocity = 0.0f;
     }
+
+    void IncreasesPower() const { m_Hook->SetResistance(0.4f); }
+
+    void Reset();
 
 private:
     std::array<std::shared_ptr<UI::Picture>, 2> m_Wheels;

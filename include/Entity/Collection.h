@@ -3,7 +3,7 @@
 #include "Core/Entity.h"
 
 
-class Collection final : public Entity {
+class Collection : public Entity {
 public:
     Collection(const std::shared_ptr<Core::Drawable> &drawable, std::string name, int money, float weight);
 

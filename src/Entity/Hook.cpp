@@ -49,7 +49,7 @@ void Hook::HookCollection(const std::shared_ptr<Collection> &collection) {
                                 sin(m_Transform.rotation),
                                 -cos(m_Transform.rotation)
                             ) * (collection->GetHitBox().size.y * 0.5f + 10.0f));
-    m_VelocityDirection /= (collection->GetWeight() / 100.0f) * 0.5f;
+    m_VelocityDirection /= (collection->GetWeight() / 100.0f) * (1.0f - m_WeightResistance);
 }
 
 std::shared_ptr<Collection> Hook::GetHookedCollection() const {
@@ -78,3 +78,10 @@ void Hook::Swing(const float dt) {
     m_SwingAngle = kMaxSwingAngle * sin(kSwingSpeed * m_TimeAcc);
     m_Transform.rotation = glm::radians(m_SwingAngle);
 }
+
+void Hook::SetResistance(const float resistance) {
+    if (resistance < 0.0f || 1.0f < resistance)
+        throw std::invalid_argument("wrong resistance value\n");
+    m_WeightResistance = resistance;
+}
+

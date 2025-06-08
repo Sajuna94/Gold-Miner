@@ -4,6 +4,7 @@
 #include "UI/Button.h"
 #include "UI/Picture.h"
 #include "UI/TextBox.h"
+#include "Util/SFX.hpp"
 
 namespace Screen {
     class PropsShop final : public IScreen {
@@ -22,6 +23,12 @@ namespace Screen {
             std::string name;
             std::string description;
             std::string path;
+        };
+
+        struct ProductObject {
+            std::shared_ptr<UI::Button> imgBtn;
+            std::shared_ptr<UI::TextBox> costTb;
+            std::string name;
         };
 
         const std::unordered_map<std::string, ShopItem> c_ShopItemTable = {
@@ -56,7 +63,7 @@ namespace Screen {
         };
 
         int m_CurrentMoney{};
-        std::unordered_map<std::shared_ptr<UI::Button>, std::string> m_ShopButtons;
+        std::vector<ProductObject> m_Products;
         std::unordered_map<std::string, int> m_Inventory;
 
         std::shared_ptr<UI::Picture> m_UI;
@@ -64,6 +71,8 @@ namespace Screen {
         std::shared_ptr<UI::TextBox> m_CurrentMoneyTextBox;
         std::shared_ptr<UI::Button> m_NextLevelButton;
         std::shared_ptr<UI::TextBox> m_TipsTextBox;
+
+        std::shared_ptr<Util::SFX> m_CashSound;
 
         void MakeUI();
 

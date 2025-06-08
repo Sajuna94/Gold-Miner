@@ -27,8 +27,6 @@ public:
     virtual void SetPosition(const glm::vec2 &pos) { m_Transform.translation = pos; }
     void SetHitBox(const rect &rect) { m_HitBox = rect; }
 
-    [[nodiscard]] const bool GetVis const 
-
     [[nodiscard]] bool IsOverlay(const std::shared_ptr<IHittable> &other) const override;
 
     virtual void Move(const glm::vec2 &delta, float dt);

@@ -9,6 +9,7 @@
 namespace Screen {
     class GameScene final : public IScreen {
     public:
+
         void Update() override;
 
         void Init(Util::Renderer &m_Root) override;
@@ -21,9 +22,11 @@ namespace Screen {
         void MakeUI();
 
         std::shared_ptr<Util::GameObject> m_UI;
-        std::unordered_map<std::string, int> m_Inventory;
-        std::shared_ptr<Game::Logic> m_Logic;
 
+        std::shared_ptr<Game::Logic> m_Logic;
+        std::unordered_map<std::string, int> m_Inventory;
+
+        int m_ElapsedTime = 0;
         int m_ElapsedMoney = 0;
         std::shared_ptr<UI::TextBox> m_MoneyTextBox;
         std::shared_ptr<UI::TextBox> m_GoalTextBox;
@@ -34,9 +37,13 @@ namespace Screen {
         float dtSum = 0.0f;
         std::shared_ptr<UI::TextBox> m_FpsTextBox;
 
-        void RefreshLevel();
+        std::shared_ptr<Util::SFX> m_MoneySound;
+
+        void RefreshLevel(int levelIndex);
 
         float CalculateSmoothedFPS(float dt);
+
+        static void ToPropsShop(int money);
     };
 } // Screen
 

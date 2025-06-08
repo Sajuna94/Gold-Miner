@@ -19,7 +19,7 @@ Bomb::Bomb(const float zIndex, const float radius)
 }
 
 void Bomb::Explode() {
-    SetZIndex(m_ZIndex + 50);
+    SetZIndex(90);
     SetDrawable(m_Effect);
     m_Effect->Play();
     if (m_Sound) m_Sound->Play();

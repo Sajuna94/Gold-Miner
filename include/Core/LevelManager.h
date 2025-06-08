@@ -14,6 +14,8 @@ public:
     static int GetLevelIndex();
 
     static void SetLevelIndex(int index);
+
+    static int GetMaxLevelIndex();
 private:
     LevelManager() = default;
 

@@ -1,11 +1,16 @@
 #include "Game/Logic.h"
 
+#include <thread>
+
 #include "Core/LevelManager.h"
+#include "Core/Timer.h"
 #include "Entity/Bomb.h"
 #include "Game/Factory.h"
 #include "Game/Level.h"
 #include "Util/Input.hpp"
 #include "Util/Time.hpp"
+
+#define SPAWN_LIMIT 15
 
 namespace Game {
     Logic::Logic() {
@@ -14,16 +19,22 @@ namespace Game {
         AddChild(m_Miner);
 
         m_Spawner = std::make_shared<Spawner>(rect({0, -110}, {WINDOW_WIDTH, WINDOW_HEIGHT - 220}));
+        m_Timer = std::make_shared<Timer>();
     }
 
     void Logic::Update(const float dt) {
+        HandleGameState(dt);
+
         switch (m_State) {
             case State::RUNNING:
-                HandleTestInput();
                 HandleMinerState(dt);
                 HandlePropsInput();
                 UpdateActiveBombs();
                 UpdateActiveTnts(dt);
+                for (auto &rat: m_ActiveRats) rat->Update(dt);
+                break;
+            // 目前這邊以下無作用 (為了擴充性而保留
+            case State::GAME_OVER:
                 break;
             case State::PAUSED:
                 break;
@@ -44,93 +55,58 @@ namespace Game {
     }
 
     void Logic::Reset() {
+        m_Timer->Reset();
+        m_Miner->Reset();
+        m_Miner->SetPosition({0, 258});
+
         m_CurrentMoney = 0;
+        m_CurrentSecond = m_Level->GetTimeLimit();
 
         for (const auto &entity: m_Spawner->GetSpawnedEntities())
             RemoveChild(entity);
         m_Spawner->Clear();
         m_Spawner->SetSpawnLimits(m_Level->GetSpawnLimits());
 
+        m_ActiveBombs.clear();
+        m_ActiveTnts.clear();
+        m_ActiveRats.clear();
+
         const auto start = Util::Time::GetElapsedTimeMs();
-        while (m_Spawner->GetSpawnedEntities().size() < 10 && m_Spawner->GetLimitTotal() != 0) {
-            if (const auto &entity = m_Spawner->TrySpawn())
-                AddChild(entity);
+        while (m_Spawner->GetSpawnedEntities().size() < SPAWN_LIMIT && m_Spawner->GetLimitTotal() != 0) {
+            SpawnEntity();
         }
-        printf("Created %d entities in %.2f ms\n", 10, Util::Time::GetElapsedTimeMs() - start);
+        printf("Created %lld entities in %.2f ms\n", m_Spawner->GetSpawnedEntities().size(),
+               Util::Time::GetElapsedTimeMs() - start);
     }
 
-    void Logic::HandleTestInput() {
-        const std::vector<std::string> entityNames = {"Bomb", "Gold", "Stone"};
+    void Logic::HandleGameState(const float dt) {
+        m_Timer->Update(dt);
 
-        if (!m_ScrollEntity) {
-            m_ScrollEntity = Factory::CreateEntity(entityNames[m_ScrollIndex], 10);
-        }
-
-        if (Util::Input::IsKeyDown(Util::Keycode::V)) {
-
-        }
-        if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_RB)) {
-
-        }
-
-        if (Util::Input::IfScroll()) {
-            const int scrollDelta = static_cast<int>(Util::Input::GetScrollDistance().y);
-            m_ScrollIndex = WrapMod(m_ScrollIndex + scrollDelta, static_cast<int>(entityNames.size()));
-
-            RemoveChild(m_ScrollEntity);
-            m_ScrollEntity = Factory::CreateEntity(entityNames[m_ScrollIndex], 10);
-            AddChild(m_ScrollEntity);
-        }
-
-
-        if (Util::Input::IsKeyPressed(Util::Keycode::P)) {
-            if (Util::Input::IsKeyDown(Util::Keycode::P)) {
-                m_ScrollEntity->SetVisible(true);
+        if (m_Timer->Event(1000)) {
+            if (m_State != State::GAME_OVER && --m_CurrentSecond == 0) {
+                m_State = State::GAME_OVER;
             }
-        }
-        else if (Util::Input::IsKeyUp(Util::Keycode::P) && m_ScrollEntity) {
-            m_ScrollEntity->SetVisible(false);
-        }
-        if (m_ScrollEntity)
-            m_ScrollEntity->SetPosition(Util::Input::GetCursorPosition());
-
-
-        if (Util::Input::IsKeyPressed(Util::Keycode::P)) {
-            if (Util::Input::IfScroll()) {
-                const int scrollDelta = static_cast<int>(Util::Input::GetScrollDistance().y);
-                m_ScrollIndex = WrapMod(m_ScrollIndex + scrollDelta, total);
-
-                RemoveChild(m_ScrollEntity);
-                m_ScrollEntity = Factory::CreateEntity(entityNames[m_ScrollIndex], 10);
-                AddChild(m_ScrollEntity);
-            }
-            if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_RB)) {
-                bool overlayFlag = false;
-                for (const auto &other: m_Spawner->GetSpawnedEntities()) {
-                    if (m_ScrollEntity->IsOverlay(other)) {
-                        overlayFlag = true;
-                        break;
-                    }
+            if (m_Spawner->GetSpawnedEntities().size() < SPAWN_LIMIT && m_Miner->GetHook()->GetState() ==
+                Hook::State::STOPPED) {
+                SpawnEntity();
                 }
-                if (!overlayFlag) {
-                    m_Spawner->AddSpawned(m_ScrollEntity);
-                    m_ScrollEntity = nullptr;
-                }
-            } else if (m_ScrollEntity) {
-                m_ScrollEntity->SetPosition(Util::Input::GetCursorPosition());
-            }
-        } else {
-            if (m_ScrollEntity) m_ScrollEntity->SetVisible(false);
         }
     }
 
     void Logic::HandleMinerState(const float dt) {
         switch (const auto &hook = m_Miner->GetHook(); hook->GetState()) {
             case Hook::State::STOPPED: {
-                int dir = 0;
-                if (Util::Input::IsKeyPressed(Util::Keycode::A)) dir -= 1;
-                if (Util::Input::IsKeyPressed(Util::Keycode::D)) dir += 1;
-                m_Miner->SmoothMove(dir, dt);
+                if (LevelManager::GetLevelIndex() > 5) {
+                    int dir = 0;
+                    if (Util::Input::IsKeyPressed(Util::Keycode::A)) dir -= 1;
+                    if (Util::Input::IsKeyPressed(Util::Keycode::D)) dir += 1;
+                    if (abs(m_Miner->GetPosition().x) > 400) {
+                        m_Miner->SetPosition({
+                            glm::clamp(m_Miner->GetPosition().x, -400.0f, 400.0f), m_Miner->GetPosition().y
+                        });
+                    }
+                    m_Miner->SmoothMove(dir, dt);
+                }
 
                 if (Util::Input::IsKeyDown(Util::Keycode::SPACE) || Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB))
                     m_Miner->ThrowHook();
@@ -149,8 +125,12 @@ namespace Game {
 
                 for (const auto &entity: m_Spawner->GetSpawnedEntities()) {
                     if (hook->IsOverlay(entity)) {
-                        if (const auto &collection = std::dynamic_pointer_cast<Collection>(entity))
+                        if (const auto &collection = std::dynamic_pointer_cast<Collection>(entity)) {
                             hook->HookCollection(collection);
+                            if (collection->GetName() == "Rat") {
+                                m_ActiveRats.erase(std::dynamic_pointer_cast<Rat>(collection));
+                            }
+                        }
                         if (const auto &bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
                             bomb->Explode();
                             m_Spawner->Despawn(bomb);
@@ -184,8 +164,8 @@ namespace Game {
     void Logic::HandlePropsInput() {
         if (Util::Input::IsKeyDown(Util::Keycode::Q) && m_Inventory["Tnt"] > 0) {
             m_Inventory["Tnt"]--;
-            auto tnt = Factory::CreateTnt(20);
-            tnt->SetPosition(m_Miner->GetPosition());
+            auto tnt = Factory::CreateTnt(70);
+            tnt->SetPosition(m_Miner->GetPosition() + glm::vec2(0, -50.0f));
             AddChild(tnt);
             m_ActiveTnts.emplace(tnt);
         }
@@ -199,8 +179,6 @@ namespace Game {
 
             std::vector<std::shared_ptr<Entity> > toDespawn;
             for (const auto &entity: m_Spawner->GetSpawnedEntities()) {
-                if (entity->GetName() == "Rock")
-                    continue;
                 if (bomb->InBlastRadius(entity))
                     toDespawn.emplace_back(entity);
             }
@@ -208,6 +186,12 @@ namespace Game {
                 if (auto other = std::dynamic_pointer_cast<Bomb>(entity)) {
                     other->Explode();
                     m_ActiveBombs.emplace(other);
+                } else if (auto rat = std::dynamic_pointer_cast<Rat>(entity)) {
+                    RemoveChild(rat);
+                    auto diamond = Factory::CreateDiamond(rat->GetZIndex());
+                    diamond->SetPosition(rat->GetPosition());
+                    m_Spawner->AddSpawned(diamond);
+                    AddChild(diamond);
                 } else {
                     RemoveChild(entity);
                 }
@@ -224,11 +208,15 @@ namespace Game {
             tnt->m_Transform.rotation += 0.2f;
             tnt->Move(glm::vec2(0, -0.3f), dt);
 
+            if (!hit::intersect(tnt->GetWorldHitBox(), rect({WINDOW_WIDTH, WINDOW_HEIGHT}))) {
+                RemoveChild(tnt);
+                m_ActiveTnts.erase(tnt);
+                continue;
+            }
+
             std::vector<std::shared_ptr<Entity> > toDespawn;
             for (const auto &entity: m_Spawner->GetSpawnedEntities()) {
-                if (entity->GetName() != "Rock")
-                    continue;
-                if (tnt->IsOverlay(entity)) {
+                if (entity->GetName() == "Rock" && tnt->IsOverlay(entity)) {
                     // create explode effect
                     auto bomb = Factory::CreateBomb(tnt->GetZIndex(), 100);
                     bomb->Explode();
@@ -252,8 +240,33 @@ namespace Game {
 
     float Logic::GetAngleFromTo(const glm::vec2 &from, const glm::vec2 &to) {
         const glm::vec2 delta = to - from;
-        float angle = std::atan2(delta.x, -delta.y) * 180.0f / M_PI;
+        auto angle = static_cast<float>(std::atan2(delta.x, -delta.y) * 180.0 / M_PI);
         if (angle < 0.0f) angle += 360.0f;
         return angle;
+    }
+
+    void Logic::SetInventory(const std::unordered_map<std::string, int> &inventory) {
+        m_Inventory = inventory;
+
+        if (m_Inventory["StrengthDrink"] >= 1) {
+            m_Miner->IncreasesPower();
+        }
+    }
+
+    void Logic::SpawnEntity() {
+        if (const auto &entity = m_Spawner->TrySpawn()) {
+            AddChild(entity);
+            if (entity->GetName() == "Rat") {
+                m_ActiveRats.emplace(std::dynamic_pointer_cast<Rat>(entity));
+            }
+
+            if (m_Inventory["DiamondPolish"] >= 1 && entity->GetName() == "Diamond") {
+                const auto collection = std::dynamic_pointer_cast<Collection>(entity);
+                collection->SetMoney(static_cast<int>(static_cast<float>(collection->GetMoney()) * 1.5f));
+            } else if (m_Inventory["StoneBook"] >= 1 && entity->GetName() == "Stone") {
+                const auto collection = std::dynamic_pointer_cast<Collection>(entity);
+                collection->SetWeight(collection->GetWeight() * 0.5f);
+            }
+        }
     }
 } // Game

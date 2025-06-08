@@ -1,5 +1,6 @@
 #include "Screen/StartMenu.h"
 
+#include "Core/LevelManager.h"
 #include "Core/ScreenManager.h"
 #include "Screen/GameScene.h"
 #include "Util/Input.hpp"
@@ -13,10 +14,12 @@ namespace Screen {
                 : RESOURCE_DIR "/Textures/Button/start-button-normal.png"
         );
         if (m_StartButton->OnClick()) {
+            LevelManager::SetLevelIndex(1);
             ScreenManager::NextScreen(std::make_unique<GameScene>());
         }
 
         if (Util::Input::IsKeyDown(Util::Keycode::TAB)) {
+            LevelManager::SetLevelIndex(1);
             ScreenManager::NextScreen(std::make_unique<GameScene>());
         }
     }

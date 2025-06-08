@@ -59,6 +59,10 @@ namespace Game {
     }
 
     std::optional<std::string> Spawner::PickSpawnName() {
+        if (m_SpawnLimits["Rock"] > 0) {
+            return "Rock";
+        }
+
         std::vector<std::string> names;
         std::vector<int> weights;
         for (const auto &[name, limit]: m_SpawnLimits) {

@@ -1,6 +1,6 @@
 #include "Core/LevelManager.h"
 
-#define MAX_LEVEL_INDEX 10
+#define MAX_LEVEL_INDEX 15
 
 std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
     if (levelIndex == 0)
@@ -8,26 +8,46 @@ std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
 
     std::shared_ptr<Game::Level> level;
     if (levelIndex <= 5) {
-        level = std::make_shared<Game::Level>(30, 600 + levelIndex * 100);
+        level = std::make_shared<Game::Level>(50, 600 + levelIndex * 100);
         level->SetSpawnLimits({
             {"Diamond", 2},
             {"Gold", 4 + levelIndex * 2},
             {"Stone", 2 + levelIndex / 2},
             {"Bomb", 3},
+            {"Bag", 1},
         });
         switch (levelIndex) {
-            case 1: level->SetEntityLimit("Stone", 1); break;
-            case 5: level->SetEntityLimit("Diamond", 3); break;
+            case 1: level->SetEntityLimit("Stone", 1);
+                break;
+            case 5: level->SetEntityLimit("Diamond", 3);
+                break;
             default: break;
         }
-    } else if (levelIndex <= MAX_LEVEL_INDEX) {
-        level = std::make_shared<Game::Level>(60, 800 + levelIndex * 50);
+    } else if (levelIndex <= 10) {
+        const int offsetIndex = levelIndex - 5;
+        level = std::make_shared<Game::Level>(70, 800 + offsetIndex * 50);
         level->SetSpawnLimits({
-            {"Rock", 3},
+            {"Rock", 2},
+            {"Diamond", 3},
+            {"Gold", 6 + offsetIndex},
+            {"Stone", 8 + offsetIndex / 2},
+            {"Bomb", 8},
+            {"Bag", 2},
+        });
+        if (offsetIndex == 5)
+            level->SetEntityLimit("Rock", 3);
+
+    } else if (levelIndex <= MAX_LEVEL_INDEX) {
+        const int offsetIndex = levelIndex - 10;
+        level = std::make_shared<Game::Level>(70, 1200 + offsetIndex * 150);
+        level->SetSpawnLimits({
             {"Diamond", 2},
-            {"Gold", 8 + levelIndex - 5},
-            {"Stone", 2 + levelIndex / 2},
-            {"Bomb", 3},
+            {"Gold", 2 + offsetIndex},
+            {"Stone", 3 + offsetIndex / 2},
+            {"Bomb", 10 + offsetIndex},
+            {"Bag", 2},
+            {"Rat", 5 + offsetIndex},
+            {"PulledGold", 2},
         });
     }
     return level;
@@ -43,12 +63,13 @@ int LevelManager::GetLevelIndex() {
 }
 
 void LevelManager::SetLevelIndex(const int index) {
-    if (index < 0 || MAX_LEVEL_INDEX < index) {
+    if (index <= 0 || MAX_LEVEL_INDEX < index) {
         printf("[!] Level index out of range\n");
         return;
     }
     s_LevelIndex = index;
 }
 
-
-
+int LevelManager::GetMaxLevelIndex() {
+    return MAX_LEVEL_INDEX;
+}

@@ -5,7 +5,7 @@
 
 namespace Game {
     std::shared_ptr<Entity> Factory::CreateEntity(const std::string &name, const float zIndex) {
-        if (const auto it = Registry().find(name); it != Registry().end()) {
+        if (const auto it = FactoryCatalog().find(name); it != FactoryCatalog().end()) {
             return it->second(zIndex);
         }
         return nullptr;
@@ -25,7 +25,7 @@ namespace Game {
         );
         anim->SetCurrentFrame(rand_int(0, static_cast<int>(anim->GetFrameCount()) - 1));
 
-        auto diamond = std::make_unique<Collection>(std::move(anim), "Diamond", 500, 150.0f);
+        auto diamond = std::make_unique<Collection>(std::move(anim), "Diamond", 500, 70.0f);
         diamond->SetHitBox(rect({30, 20}));
         diamond->SetZIndex(zIndex);
 
@@ -45,21 +45,21 @@ namespace Game {
         );
         anim->SetCurrentFrame(rand_int(0, static_cast<int>(anim->GetFrameCount()) - 1));
 
-        auto gold = std::make_unique<Collection>(std::move(anim), "Gold", 500, 70.0f);
+        auto gold = std::make_unique<Collection>(std::move(anim), "Gold", 200, 150.0f);
         gold->SetHitBox(rect({88, 88}));
         gold->SetZIndex(zIndex);
 
         const int persent = rand_int(1, 10);
         float mult;
-        if (persent <= 4)
+        if (persent <= 2)
             mult = rand_int(50, 80) / 100.0f;
         else if (persent <= 9)
-            mult = rand_int(120, 150) / 100.0f;
+            mult = rand_int(100, 120) / 100.0f;
         else
-            mult = rand_int(170, 200) / 100.0f;
+            mult = rand_int(150, 170) / 100.0f;
 
         gold->m_Transform.scale = glm::vec2(mult);
-        gold->SetMoney(gold->GetMoney() * mult);
+        gold->SetMoney(gold->GetMoney() * log1p(mult));
         gold->SetWeight(gold->GetWeight() * mult);
         gold->SetHitBox(rect(gold->GetHitBox().size * mult));
 
@@ -73,7 +73,7 @@ namespace Game {
         };
         auto image = std::make_shared<Util::Image>(paths[rand_int(0, 1)]);
 
-        auto stone = std::make_unique<Collection>(std::move(image), "Stone", 50, 300.0f);
+        auto stone = std::make_unique<Collection>(std::move(image), "Stone", 50, 350.0f);
         stone->SetHitBox(rect(stone->GetScaledSize() * 0.9f));
         stone->SetZIndex(zIndex);
 
@@ -85,20 +85,24 @@ namespace Game {
             mult = rand_int(150, 170) / 100.0f;
 
         stone->m_Transform.scale = glm::vec2(mult);
-        stone->SetMoney(stone->GetMoney() * mult);
-        stone->SetWeight(stone->GetWeight() * mult);
+        stone->SetWeight(stone->GetWeight() * log1p(mult));
         stone->SetHitBox(rect(stone->GetHitBox().size * mult));
 
         return stone;
     }
 
-    // TODO:
-    std::shared_ptr<Collection> Factory::CreateRock(float zIndex) {
-        static constexpr std::array<const char *, 2> paths = {
-            // RESOURCE_DIR "/Textures/Entity/Collection/stone-1.png",
-            RESOURCE_DIR "/Textures/Entity/Collection/stone-2.png"
-        };
-        auto image = std::make_shared<Util::Image>(paths[rand_int(0, 1)]);
+    std::shared_ptr<Entity> Factory::CreateRock(const float zIndex) {
+        const auto static image = std::make_shared<Util::Image>(RESOURCE_DIR "/Textures/Entity/rock-layer.png");
+
+        auto rock = std::make_shared<Entity>("Rock");
+        rock->SetDrawable(image);
+        rock->SetZIndex(zIndex);
+
+        const auto mult = glm::vec2(static_cast<float>(rand_int(80, 150)) / 100.0f * 0.8f, 0.4f);
+        rock->m_Transform.scale = mult;
+        rock->SetHitBox(rect(glm::vec2(253, 207) * mult));
+
+        return rock;
     }
 
     std::shared_ptr<Bomb> Factory::CreateBomb(float zIndex, float radius) {
@@ -130,14 +134,49 @@ namespace Game {
         auto tnt = std::make_shared<Entity>("Tnt");
         tnt->SetDrawable(s_Img);
         tnt->SetZIndex(zIndex);
-        tnt->m_Transform.scale = glm::vec2(0.5f);
+        tnt->m_Transform.scale = glm::vec2(0.4f);
 
         return tnt;
     }
 
+    std::shared_ptr<Collection> Factory::CreateBag(const float zIndex) {
+        auto static s_Img = std::make_shared<Util::Image>(RESOURCE_DIR "/Textures/Entity/Collection/bag.png");
 
-    void Factory::Recycle(const std::shared_ptr<Entity>& entity) {
-        s_Pool[entity->GetName()].emplace(entity);
+        auto bag = std::make_shared<Collection>(s_Img, "Bag", rand_int(300, 500), 200.0f);
+        bag->SetHitBox(rect({68, 74}));
+        bag->SetDrawable(s_Img);
+        bag->SetZIndex(zIndex);
+
+        return bag;
     }
 
+    std::shared_ptr<Rat> Factory::CreateRat(const float zIndex) {
+        auto rat = std::make_shared<Rat>();
+        rat->SetZIndex(zIndex);
+        rat->SetHitBox(rect({53, 42}));
+
+        return rat;
+    }
+
+    std::shared_ptr<Collection> Factory::CreatePulledGold(const float zIndex) {
+        auto anim = std::make_shared<Util::Animation>(
+            std::vector<std::string>{
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-2.png",
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-3.png",
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-4.png",
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-5.png",
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-6.png",
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-7.png",
+                RESOURCE_DIR "/Textures/Entity/Collection/pulled-gold-1.png",
+            },
+            true, 70, true, rand_int(500, 750)
+        );
+        anim->SetCurrentFrame(rand_int(0, static_cast<int>(anim->GetFrameCount()) - 1));
+
+        auto gold = std::make_unique<Collection>(std::move(anim), "PulledGold", 400, 150.0f);
+        gold->SetHitBox(rect({85, 91}));
+        gold->SetZIndex(zIndex);
+
+        return gold;
+    }
 } // Game

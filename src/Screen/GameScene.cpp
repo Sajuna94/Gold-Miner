@@ -5,6 +5,7 @@
 #include "Core/ScreenManager.h"
 #include "Game/Factory.h"
 #include "Screen/PropsShop.h"
+#include "Screen/StartMenu.h"
 #include "UI/Picture.h"
 #include "Util/Input.hpp"
 #include "Util/Time.hpp"
@@ -22,50 +23,66 @@ namespace Screen {
         float fps = CalculateSmoothedFPS(dt);
         m_FpsTextBox->SetText(fmt::format("{:.2f}", fps));
 
+        // Game Over
+        if (m_Logic->GetState() == Game::Logic::State::GAME_OVER) {
+            if (const auto level = LevelManager::CreateLevel(LevelManager::GetLevelIndex()); m_ElapsedMoney >= level->GetTargetMoney())
+                ToPropsShop(m_ElapsedMoney);
+            else {
+                ScreenManager::NextScreen(std::make_unique<StartMenu>());
+            }
+        }
+
+        if (Util::Input::IsKeyDown(Util::Keycode::F) && m_Logic->GetMoney() ) {
+            if (const auto level = LevelManager::CreateLevel(LevelManager::GetLevelIndex()); m_ElapsedMoney >= level->GetTargetMoney())
+                ToPropsShop(m_ElapsedMoney);
+        }
+
         // TAB to Shop
         if (Util::Input::IsKeyDown(Util::Keycode::TAB)) {
-            auto next = std::make_unique<PropsShop>();
-            next->SetMoney(m_ElapsedMoney);
-            ScreenManager::NextScreen(std::move(next));
+            if (LevelManager::GetLevelIndex() == LevelManager::GetMaxLevelIndex())
+                ScreenManager::NextScreen(std::make_unique<StartMenu>());
+            else
+                ToPropsShop(9999);
         }
 
         // Level Change
-        int offset = 0;
         if (Util::Input::IsKeyDown(Util::Keycode::LEFT)) {
-            offset = -1;
+            LevelManager::SetLevelIndex(LevelManager::GetLevelIndex() - 1);
+            RefreshLevel(LevelManager::GetLevelIndex());
         } else if (Util::Input::IsKeyDown(Util::Keycode::RIGHT)) {
-            offset = 1;
-        }
-        if (offset != 0) {
-            LevelManager::SetLevelIndex(LevelManager::GetLevelIndex() + offset);
-            m_Logic->Load(LevelManager::GetLevelIndex());
-            RefreshLevel();
+            LevelManager::SetLevelIndex(LevelManager::GetLevelIndex() + 1);
+            RefreshLevel(LevelManager::GetLevelIndex());
         }
 
         // Reset Level
         if (Util::Input::IsKeyPressed(Util::Keycode::LCTRL) && Util::Input::IsKeyDown(Util::Keycode::R)) {
-            RefreshLevel();
+            RefreshLevel(LevelManager::GetLevelIndex());
         }
 
         // Got Money
         if (m_ElapsedMoney != m_Logic->GetMoney()) {
             m_ElapsedMoney = m_Logic->GetMoney();
+            m_MoneySound->Play();
             m_MoneyTextBox->SetText(std::to_string(m_ElapsedMoney));
+        }
+        if (m_ElapsedTime != m_Logic->GetTime()) {
+            m_ElapsedTime = m_Logic->GetTime();
+            m_TimeTextBox->SetText(std::to_string(m_ElapsedTime));
         }
 
         m_Logic->Update(dt);
     }
 
     void GameScene::Init(Util::Renderer &m_Root) {
+        m_MoneySound = std::make_shared<Util::SFX>(RESOURCE_DIR "/Sounds/ring-effect.mp3");
+
         m_UI = std::make_shared<Util::GameObject>();
         m_Logic = std::make_shared<Game::Logic>();
         m_Root.AddChildren({m_UI, m_Logic});
         MakeUI();
 
-        m_Logic->Load(LevelManager::GetLevelIndex());
         m_Logic->SetInventory(m_Inventory);
-
-        RefreshLevel();
+        RefreshLevel(LevelManager::GetLevelIndex());
         m_Logic->Resume();
     }
 
@@ -82,7 +99,7 @@ namespace Screen {
         m_FpsTextBox = std::make_shared<UI::TextBox>(
             30, "FPSTextBox", UI::TextBox::Align::RIGHT, UI::TextBox::Style::Sans);
         m_FpsTextBox->SetPosition(
-            glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) * 0.5f * 0.95f - glm::vec2(-45, 0));
+            glm::vec2(WINDOW_WIDTH, WINDOW_HEIGHT) * 0.5f * 0.95f + glm::vec2(30, 0));
 
         // Banner
         const auto moneyGoalBanner = std::make_shared<UI::Picture>(
@@ -135,14 +152,23 @@ namespace Screen {
         return 1000.0f / avgDt;
     }
 
-    void GameScene::RefreshLevel() {
-        m_Logic->Reset();
+    void GameScene::RefreshLevel(const int levelIndex) {
+        m_Logic->Load(levelIndex);
         const auto level = LevelManager::CreateLevel(LevelManager::GetLevelIndex());
 
         m_ElapsedMoney = m_Logic->GetMoney();
+        m_ElapsedTime = m_Logic->GetTime();
+
         m_MoneyTextBox->SetText(std::to_string(m_Logic->GetMoney()));
         m_GoalTextBox->SetText(std::to_string(level->GetTargetMoney()));
         m_LevelTextBox->SetText(std::to_string(LevelManager::GetLevelIndex()));
         m_TimeTextBox->SetText(std::to_string(level->GetTimeLimit()));
     }
+
+    void GameScene::ToPropsShop(const int money) {
+        auto next = std::make_unique<PropsShop>();
+        next->SetMoney(money);
+        ScreenManager::NextScreen(std::move(next));
+    }
+
 } // Screen
