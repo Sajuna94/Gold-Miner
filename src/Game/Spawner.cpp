@@ -103,8 +103,9 @@ namespace Game {
                     break;
                 }
             }
-            if (!overlaps)
+            if (!overlaps) {
                 return true;
+            }
         }
         return false;
     }

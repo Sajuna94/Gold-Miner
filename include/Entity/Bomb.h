@@ -13,11 +13,12 @@ public:
 
     [[nodiscard]] bool HasExploded() const;
 
-    [[nodiscard]] bool InBlastRadius(const std::shared_ptr<Entity>& entity) const;
+    [[nodiscard]] bool InBlastRadius(const std::shared_ptr<Entity> &entity) const;
 
-    void SetEffect(const std::shared_ptr<Util::Animation>& effect);
+    void SetEffect(const std::shared_ptr<Util::Animation> &effect);
 
-    void SetSound(const std::shared_ptr<Util::SFX>& sound);
+    void SetSound(const std::shared_ptr<Util::SFX> &sound);
+
 private:
     float m_Radius;
     std::shared_ptr<Util::Animation> m_Effect;

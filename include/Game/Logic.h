@@ -59,7 +59,7 @@ namespace Game {
 
         void HandlePropsInput();
 
-        void HandleGameState(float dt);
+        void HandleGameState();
 
         void UpdateActiveBombs();
 

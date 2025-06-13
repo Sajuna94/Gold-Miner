@@ -10,7 +10,7 @@
 namespace Screen {
     void PropsShop::Update() {
         if (Util::Input::IsKeyDown(Util::Keycode::TAB)) {
-            for (const auto &[str, item] : c_ShopItemTable) {
+            for (const auto &[str, item]: c_ShopItemTable) {
                 m_Inventory[str] = 99;
             }
             LevelManager::NextLevel();
@@ -119,7 +119,7 @@ namespace Screen {
     }
 
     void PropsShop::RefreshShopItems() {
-        for (const auto& product: m_Products) {
+        for (const auto &product: m_Products) {
             m_UI->RemoveChild(product.imgBtn);
             m_UI->RemoveChild(product.costTb);
         }
@@ -129,16 +129,21 @@ namespace Screen {
         std::vector<std::string> pool = {
             "StrengthDrink"
         };
-
-        // according to level entity pool
-        for (int i = level->GetSpawnLimits()["Rock"]; i > 0; --i)
-            pool.emplace_back("Tnt");
         if (level->GetSpawnLimits()["Stone"] > 0)
             pool.emplace_back("StoneBook");
         if (level->GetSpawnLimits()["Diamond"] > 0)
             pool.emplace_back("DiamondPolish");
 
-        constexpr size_t MaxItems = 5;
+        while (pool.size() > 2) {
+            pool.erase(pool.begin() + rand_int(0, pool.size() - 1));
+        }
+
+        // according to level entity pool
+        for (int i = level->GetSpawnLimits()["Rock"]; i > 0; --i)
+            pool.emplace_back("Tnt");
+
+
+        const size_t MaxItems = 3 + level->GetSpawnLimits()["Rock"];
         std::random_device rd;
         std::mt19937 gen(rd());
         std::shuffle(pool.begin(), pool.end(), gen);

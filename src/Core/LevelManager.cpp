@@ -10,7 +10,7 @@ std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
     if (levelIndex <= 5) {
         level = std::make_shared<Game::Level>(50, 600 + levelIndex * 100);
         level->SetSpawnLimits({
-            {"Diamond", 2},
+            {"Diamond", 1},
             {"Gold", 4 + levelIndex * 2},
             {"Stone", 2 + levelIndex / 2},
             {"Bomb", 3},
@@ -19,7 +19,7 @@ std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
         switch (levelIndex) {
             case 1: level->SetEntityLimit("Stone", 1);
                 break;
-            case 5: level->SetEntityLimit("Diamond", 3);
+            case 5: level->SetEntityLimit("Diamond", 2);
                 break;
             default: break;
         }
@@ -28,7 +28,7 @@ std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
         level = std::make_shared<Game::Level>(70, 800 + offsetIndex * 50);
         level->SetSpawnLimits({
             {"Rock", 2},
-            {"Diamond", 3},
+            {"Diamond", 2},
             {"Gold", 6 + offsetIndex},
             {"Stone", 8 + offsetIndex / 2},
             {"Bomb", 8},
@@ -39,14 +39,13 @@ std::shared_ptr<Game::Level> LevelManager::CreateLevel(const int levelIndex) {
 
     } else if (levelIndex <= MAX_LEVEL_INDEX) {
         const int offsetIndex = levelIndex - 10;
-        level = std::make_shared<Game::Level>(70, 1200 + offsetIndex * 150);
+        level = std::make_shared<Game::Level>(90, 1500 + offsetIndex * 150);
         level->SetSpawnLimits({
-            {"Diamond", 2},
-            {"Gold", 2 + offsetIndex},
-            {"Stone", 3 + offsetIndex / 2},
-            {"Bomb", 10 + offsetIndex},
-            {"Bag", 2},
-            {"Rat", 5 + offsetIndex},
+            {"Gold", 2},
+            {"Stone", 2},
+            {"Bomb", 15 + offsetIndex},
+            {"Bag", 1},
+            {"Rat", 8 + offsetIndex},
             {"PulledGold", 2},
         });
     }

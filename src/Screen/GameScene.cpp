@@ -32,6 +32,7 @@ namespace Screen {
             }
         }
 
+        // F to Shop
         if (Util::Input::IsKeyDown(Util::Keycode::F) && m_Logic->GetMoney() ) {
             if (const auto level = LevelManager::CreateLevel(LevelManager::GetLevelIndex()); m_ElapsedMoney >= level->GetTargetMoney())
                 ToPropsShop(m_ElapsedMoney);
@@ -57,6 +58,13 @@ namespace Screen {
         // Reset Level
         if (Util::Input::IsKeyPressed(Util::Keycode::LCTRL) && Util::Input::IsKeyDown(Util::Keycode::R)) {
             RefreshLevel(LevelManager::GetLevelIndex());
+        }
+
+        if (Util::Input::IsKeyDown(Util::Keycode::P)) {
+            if (m_Logic->GetState() == Game::Logic::State::PAUSED)
+                m_Logic->Resume();
+            else
+                m_Logic->Pause();
         }
 
         // Got Money

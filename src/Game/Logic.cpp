@@ -23,21 +23,15 @@ namespace Game {
     }
 
     void Logic::Update(const float dt) {
-        HandleGameState(dt);
+        HandleGameState();
 
-        switch (m_State) {
-            case State::RUNNING:
-                HandleMinerState(dt);
-                HandlePropsInput();
-                UpdateActiveBombs();
-                UpdateActiveTnts(dt);
-                for (auto &rat: m_ActiveRats) rat->Update(dt);
-                break;
-            // 目前這邊以下無作用 (為了擴充性而保留
-            case State::GAME_OVER:
-                break;
-            case State::PAUSED:
-                break;
+        if (m_State == State::RUNNING) {
+            m_Timer->Update(dt);
+            HandleMinerState(dt);
+            HandlePropsInput();
+            UpdateActiveBombs();
+            UpdateActiveTnts(dt);
+            for (auto &rat: m_ActiveRats) rat->Update(dt);
         }
     }
 
@@ -79,9 +73,7 @@ namespace Game {
                Util::Time::GetElapsedTimeMs() - start);
     }
 
-    void Logic::HandleGameState(const float dt) {
-        m_Timer->Update(dt);
-
+    void Logic::HandleGameState() {
         if (m_Timer->Event(1000)) {
             if (m_State != State::GAME_OVER && --m_CurrentSecond == 0) {
                 m_State = State::GAME_OVER;

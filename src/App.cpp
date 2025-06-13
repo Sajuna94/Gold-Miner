@@ -14,7 +14,7 @@ void App::Start() {
     LOG_TRACE("Start");
     m_CurrentState = State::UPDATE;
 
-    glDisable(GL_DEBUG_OUTPUT);
+    // glDisable(GL_DEBUG_OUTPUT);
 
     ScreenManager::Init(m_Root);
     ScreenManager::NextScreen(std::make_unique<Screen::StartMenu>());
